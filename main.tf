@@ -6,7 +6,7 @@ module "vpc" {
 }
 
 module "gateways" {
-  source            = "./modules/gateways"
+  source            = "./modules/gateway"
   vpc_id            = module.vpc.vpc_id
   public_subnet_ids = module.vpc.public_subnets
 }
@@ -19,3 +19,12 @@ module "routing" {
   private_subnet_ids  = module.vpc.private_subnets
   nat_gateway_ids     = module.gateways.nat_gateway_ids
 }
+
+module "security" {
+  source               = "./modules/security"
+  vpc_id               = module.vpc.vpc_id
+  public_subnet_ids    = module.vpc.public_subnets
+  private_subnet_ids   = module.vpc.private_subnets
+  private_subnet_cidrs = var.private_subnet_cidrs
+}
+
