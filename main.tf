@@ -38,4 +38,15 @@ module "bastion" {
   my_ip_cidr       = var.my_ip_cidr
 }
 
+module "web_server" {
+  source           = "./modules/web_server"
+  vpc_id           = module.vpc.vpc_id
+  subnet_id        = module.vpc.public_subnet_ids[0]
+  ami_id           = var.web_server_ami
+  instance_type    = var.web_server_instance_type
+  key_name         = var.ssh_key_name
+  bastion_sg_id    = module.bastion.bastion_sg_id
+  enabled          = var.web_server_enabled
+}
+
 
