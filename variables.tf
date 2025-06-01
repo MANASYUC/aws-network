@@ -18,9 +18,9 @@ variable "private_subnet_cidrs" {
 }
 
 variable "my_ip_cidr" {
-  description = "Your IP CIDR block for SSH access "
+  description = "Your IP CIDR block for SSH access"
   type        = string
-  default     = "0.0.0.0/0"  
+  default     = "0.0.0.0/0"
 }
 
 # keys----
@@ -43,21 +43,21 @@ variable "enable_web_server" {
 }
 
 variable "enable_app_server" {
-  type = bool
-  default = false 
   description = "Toggle to enable/disable app server"
+  type        = bool
+  default     = false
 }
 
 variable "enable_db_server" {
-  type = bool
-  default = false 
   description = "Toggle to enable/disable db server"
+  type        = bool
+  default     = false
 }
 
 variable "enable_traffic" {
-  type = bool
-  default = false
   description = "Toggle to enable/disable traffic client"
+  type        = bool
+  default     = false
 }
 
 variable "instance_type" {
@@ -66,7 +66,7 @@ variable "instance_type" {
   default     = "t2.micro"
 }
 
-
 variable "ami_id" {
-  type = string
+  description = "AMI ID to use for EC2 instances"
+  type        = string
 }

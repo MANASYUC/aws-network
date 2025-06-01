@@ -24,7 +24,7 @@ resource "aws_security_group" "web_server_sg" {
     from_port       = 22
     to_port         = 22
     protocol        = "tcp"
-    security_groups = [var.bastion_sg_id]   
+    security_groups = [var.bastion_sg_id]
   }
 
   egress {
@@ -44,7 +44,7 @@ resource "aws_instance" "web" {
   ami                         = var.ami_id
   instance_type               = var.instance_type
   subnet_id                   = var.subnet_id
-  vpc_security_group_ids      = [aws_security_group.web_server_sg.id]  # Use local SG id here
+  vpc_security_group_ids      = [aws_security_group.web_server_sg.id]
   key_name                    = var.key_name
   associate_public_ip_address = true
 

@@ -74,17 +74,16 @@ resource "aws_network_acl" "nw_acl" {
 }
 
 resource "aws_network_acl_association" "public" {
-  count           = length(var.public_subnet_ids)
-  subnet_id       = var.public_subnet_ids[count.index]
-  network_acl_id  = aws_network_acl.nw_acl.id
+  count          = length(var.public_subnet_ids)
+  subnet_id      = var.public_subnet_ids[count.index]
+  network_acl_id = aws_network_acl.nw_acl.id
 }
 
 resource "aws_network_acl_association" "private" {
-  count           = length(var.private_subnet_ids)
-  subnet_id       = var.private_subnet_ids[count.index]
-  network_acl_id  = aws_network_acl.nw_acl.id
+  count          = length(var.private_subnet_ids)
+  subnet_id      = var.private_subnet_ids[count.index]
+  network_acl_id = aws_network_acl.nw_acl.id
 }
-
 
 resource "aws_security_group" "app_sg" {
   name        = "app-sg"
@@ -92,16 +91,16 @@ resource "aws_security_group" "app_sg" {
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
     security_groups = [aws_security_group.web_sg.id]
   }
 
   ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
     security_groups = [aws_security_group.bastion_sg.id]
   }
 
@@ -112,7 +111,6 @@ resource "aws_security_group" "app_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
 
 resource "aws_security_group" "db_sg" {
   name        = "db-sg"

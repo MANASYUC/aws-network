@@ -7,7 +7,7 @@ resource "aws_internet_gateway" "igw" {
 }
 
 resource "aws_eip" "nat" {
-  domain = "vpc"
+  domain   = "vpc"
   instance = aws_instance.nat_instance.id
 }
 
@@ -38,10 +38,9 @@ resource "aws_security_group" "nat_sg" {
 
 # NAT Instance
 resource "aws_instance" "nat_instance" {
-  ami           = var.nat_instance_ami  # You'll need to specify an Amazon NAT Instance AMI
-  instance_type = "t2.micro"           # Free tier eligible
-  subnet_id     = var.public_subnet_ids[0]
-
+  ami               = var.nat_instance_ami
+  instance_type     = "t2.micro"
+  subnet_id         = var.public_subnet_ids[0]
   source_dest_check = false  # Required for NAT functionality
   
   vpc_security_group_ids = [aws_security_group.nat_sg.id]

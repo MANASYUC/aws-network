@@ -1,9 +1,8 @@
 resource "aws_instance" "traffic_client" {
-  ami           = var.ami_id
-  instance_type = var.instance_type   # default t2.micro in variables.tf
-  subnet_id     = var.subnet_id       # private or public subnet in your VPC
-  key_name      = var.key_name
-
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
+  subnet_id              = var.subnet_id
+  key_name               = var.key_name
   vpc_security_group_ids = [var.security_group_id]
 
   user_data = <<-EOF
