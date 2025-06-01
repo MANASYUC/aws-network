@@ -40,13 +40,14 @@ module "security" {
 }
 
 module "bastion" {
-  source          = "./modules/bastion"
-  count           = var.enable_bastion ? 1 : 0
+  source           = "./modules/bastion"
+  count            = var.enable_bastion ? 1 : 0
   
-  bastion_ami     = var.ami_id
+  bastion_ami      = var.ami_id
   public_subnet_id = module.vpc.public_subnets_ids[0]
-  ssh_key_name    = var.ssh_key_name
-  my_ip_cidr      = var.my_ip_cidr
+  ssh_key_name     = var.ssh_key_name
+  my_ip_cidr       = var.my_ip_cidr
+  bastion_sg_id    = module.security.bastion_sg_id
 }
 
 module "web_server" {
@@ -58,7 +59,8 @@ module "web_server" {
   ami_id        = var.ami_id
   instance_type = var.instance_type
   key_name      = var.ssh_key_name
-  bastion_sg_id = var.enable_bastion ? module.bastion[0].bastion_sg_id : null
+  bastion_sg_id = module.security.bastion_sg_id
+  web_sg_id     = module.security.web_sg_id
 }
 
 module "app_server" {
@@ -67,7 +69,7 @@ module "app_server" {
   
   ami_id           = var.ami_id
   instance_type    = var.instance_type
-  subnet_id        = module.vpc.private_subnet_ids[0]
+  subnet_id        = module.vpc.private_subnets_ids[0]
   key_name         = var.ssh_key_name
   security_group_id = module.security.app_sg_id
 }
@@ -78,7 +80,7 @@ module "db_server" {
   
   ami_id           = var.ami_id
   instance_type    = var.instance_type
-  subnet_id        = module.vpc.private_subnet_ids[0]
+  subnet_id        = module.vpc.private_subnets_ids[0]
   key_name         = var.ssh_key_name
   security_group_id = module.security.db_sg_id
 }
@@ -89,7 +91,7 @@ module "traffic_client" {
   
   ami_id           = var.ami_id
   instance_type    = var.instance_type
-  subnet_id        = module.vpc.private_subnet_ids[0]
+  subnet_id        = module.vpc.private_subnets_ids[0]
   key_name         = var.ssh_key_name
   security_group_id = module.security.traffic_client_sg
   target_url       = "http://<your-app-server-private-ip-or-dns>"

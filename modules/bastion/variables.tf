@@ -18,3 +18,8 @@ variable "enable_bastion" {
   type = bool
   default = false
 }
+
+variable "bastion_sg_id" {
+  description = "Security group ID for the bastion host"
+  type        = string
+}

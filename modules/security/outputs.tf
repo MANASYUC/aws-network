@@ -3,6 +3,16 @@ output "security_group_id" {
   value       = aws_security_group.security_g.id
 }
 
+output "web_sg_id" {
+  description = "ID of the web server security group"
+  value       = aws_security_group.web_sg.id
+}
+
+output "bastion_sg_id" {
+  description = "ID of the bastion host security group" 
+  value       = aws_security_group.bastion_sg.id
+}
+
 output "app_sg_id" {
   description = "ID of the application server security group"
   value       = aws_security_group.app_sg.id

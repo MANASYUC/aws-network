@@ -33,3 +33,8 @@ variable "bastion_sg_id" {
   description = "Security group ID of bastion host"
   type        = string
 }
+
+variable "web_sg_id" {
+  description = "Security group ID for the web server"
+  type        = string
+}
