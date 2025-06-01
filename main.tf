@@ -36,6 +36,8 @@ module "security" {
   public_subnet_ids    = module.vpc.public_subnets_ids
   private_subnet_ids   = module.vpc.private_subnets_ids
   private_subnet_cidrs = var.private_subnet_cidrs
+  my_ip_cidr           = var.my_ip_cidr
+  app_server_subnet_cidr = module.app_server.subnet_id
 }
 
 module "bastion" {
@@ -79,9 +81,22 @@ module "db_server" {
 
   ami_id            = var.ami_id
   instance_type     = var.instance_type
-  subnet_id         = module.vpc.private_subnet_ids[1]
+  subnet_id         = module.vpc.private_subnet_ids[0]
   key_name          = var.ssh_key_name
   security_group_id = module.security.db_sg_id
 }
+
+module "traffic_client" {
+  source            = "./modules/traffic_client"
+  count             = var.enable_traffic ? 1 : 0 
+
+  ami_id            = var.ami_id      # Amazon Linux 2 AMI in your region
+  instance_type     = var.instance_type
+  subnet_id         = module.vpc.private_subnet_ids[0]
+  key_name          = var.ssh_key_name
+  security_group_id = module.security.traffic_client_sg
+  target_url        = "http://<your-app-server-private-ip-or-dns>"
+}
+
 
 

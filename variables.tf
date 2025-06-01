@@ -36,7 +36,7 @@ variable "enable_bastion" {
   default     = false
 }
 
-variable "web_server_enabled" {
+variable "enable_web_server" {
   description = "Set true to deploy web server"
   type        = bool
   default     = false
@@ -54,6 +54,11 @@ variable "enable_db_server" {
   description = "Toggle to enable/disable db server"
 }
 
+variable "enable_traffic" {
+  type = bool
+  default = false
+  description = "Toggle to enable/disable traffic client"
+}
 
 variable "instance_type" {
   description = "Instance type for web server"

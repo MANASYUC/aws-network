@@ -140,3 +140,34 @@ resource "aws_security_group" "db_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+resource "aws_security_group" "traffic_client_sg" {
+  name        = "traffic-client-sg"
+  description = "Security group for traffic client in private subnet"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description = "Allow SSH from my IP"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.my_ip_cidr]
+  }
+
+  egress {
+    description = "Allow outbound HTTP to app servers"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [var.app_server_subnet_cidr]
+  }
+
+  egress {
+    description = "Allow outbound HTTPS to app servers"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [var.app_server_subnet_cidr]
+  }
+}
+
