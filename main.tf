@@ -36,23 +36,23 @@ module "security" {
   private_subnet_ids     = module.vpc.private_subnets_ids
   private_subnet_cidrs   = var.private_subnet_cidrs
   my_ip_cidr             = var.my_ip_cidr
-  app_server_subnet_cidr = module.app_server.subnet_id
+  app_server_subnet_cidr = var.private_subnet_cidrs[0]
 }
 
 module "bastion" {
-  source           = "./modules/bastion"
-  count            = var.enable_bastion ? 1 : 0
-
-  bastion_ami      = var.ami_id
+  source          = "./modules/bastion"
+  count           = var.enable_bastion ? 1 : 0
+  
+  bastion_ami     = var.ami_id
   public_subnet_id = module.vpc.public_subnets_ids[0]
-  ssh_key_name     = var.ssh_key_name
-  my_ip_cidr       = var.my_ip_cidr
+  ssh_key_name    = var.ssh_key_name
+  my_ip_cidr      = var.my_ip_cidr
 }
 
 module "web_server" {
   source        = "./modules/servers/web"
   count         = var.enable_web_server ? 1 : 0
-
+  
   vpc_id        = module.vpc.vpc_id
   subnet_id     = module.vpc.public_subnets_ids[0]
   ami_id        = var.ami_id
@@ -62,37 +62,37 @@ module "web_server" {
 }
 
 module "app_server" {
-  source            = "./modules/servers/app"
-  count             = var.enable_app_server ? 1 : 0
-
-  ami_id            = var.ami_id
-  instance_type     = var.instance_type
-  subnet_id         = module.vpc.private_subnet_ids[0]
-  key_name          = var.ssh_key_name
+  source           = "./modules/servers/app"
+  count            = var.enable_app_server ? 1 : 0
+  
+  ami_id           = var.ami_id
+  instance_type    = var.instance_type
+  subnet_id        = module.vpc.private_subnet_ids[0]
+  key_name         = var.ssh_key_name
   security_group_id = module.security.app_sg_id
 }
 
 module "db_server" {
-  source            = "./modules/servers/db"
-  count             = var.enable_db_server ? 1 : 0
-
-  ami_id            = var.ami_id
-  instance_type     = var.instance_type
-  subnet_id         = module.vpc.private_subnet_ids[0]
-  key_name          = var.ssh_key_name
+  source           = "./modules/servers/db"
+  count            = var.enable_db_server ? 1 : 0
+  
+  ami_id           = var.ami_id
+  instance_type    = var.instance_type
+  subnet_id        = module.vpc.private_subnet_ids[0]
+  key_name         = var.ssh_key_name
   security_group_id = module.security.db_sg_id
 }
 
 module "traffic_client" {
-  source            = "./modules/traffic_client"
-  count             = var.enable_traffic ? 1 : 0
-
-  ami_id            = var.ami_id
-  instance_type     = var.instance_type
-  subnet_id         = module.vpc.private_subnet_ids[0]
-  key_name          = var.ssh_key_name
+  source           = "./modules/traffic_client"
+  count            = var.enable_traffic ? 1 : 0
+  
+  ami_id           = var.ami_id
+  instance_type    = var.instance_type
+  subnet_id        = module.vpc.private_subnet_ids[0]
+  key_name         = var.ssh_key_name
   security_group_id = module.security.traffic_client_sg
-  target_url        = "http://<your-app-server-private-ip-or-dns>"
+  target_url       = "http://<your-app-server-private-ip-or-dns>"
 }
 
 

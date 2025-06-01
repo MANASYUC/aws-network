@@ -1,6 +1,6 @@
 resource "aws_security_group" "security_g" {
   name        = "security-g"
-  description = "allows incoming traffic to access SSH and HTTPS"
+  description = "Allows incoming traffic to access SSH and HTTPS"
   vpc_id      = var.vpc_id
 
   ingress {

@@ -4,7 +4,7 @@ variable "azs" {
   default     = ["us-east-1a", "us-east-1b"]
 }
 
-# cidrs----
+# Network CIDR blocks
 variable "public_subnet_cidrs" {
   description = "CIDR blocks for public subnets"
   type        = list(string)
@@ -23,13 +23,13 @@ variable "my_ip_cidr" {
   default     = "0.0.0.0/0"
 }
 
-# keys----
+# SSH key configuration
 variable "ssh_key_name" {
-  description = "Name of the SSH key pair for Bastion host"
+  description = "Name of the SSH key pair for EC2 instances"
   type        = string
 }
 
-# toggles----
+# Feature toggles
 variable "enable_bastion" {
   description = "Toggle to enable/disable bastion host"
   type        = bool
@@ -60,8 +60,9 @@ variable "enable_traffic" {
   default     = false
 }
 
+# Instance configuration
 variable "instance_type" {
-  description = "Instance type for web server"
+  description = "Instance type for EC2 instances"
   type        = string
   default     = "t2.micro"
 }
