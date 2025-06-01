@@ -4,6 +4,7 @@ variable "azs" {
   default     = ["us-east-1a", "us-east-1b"]
 }
 
+# cidrs----
 variable "public_subnet_cidrs" {
   description = "CIDR blocks for public subnets"
   type        = list(string)
@@ -16,27 +17,23 @@ variable "private_subnet_cidrs" {
   default     = ["10.0.3.0/24", "10.0.4.0/24"]
 }
 
-variable "enable_bastion" {
-  description = "Toggle to enable/disable bastion host"
-  type        = bool
-  default     = false
-}
-
-variable "bastion_ami" {
-  description = "AMI ID for Bastion Host"
+variable "my_ip_cidr" {
+  description = "Your IP CIDR block for SSH access "
   type        = string
-  default     = "ami-0c55b159cbfafe1f0"  # Amazon Linux 2 (us-east-1 example)
+  default     = "0.0.0.0/0"  
 }
 
+# keys----
 variable "ssh_key_name" {
   description = "Name of the SSH key pair for Bastion host"
   type        = string
 }
 
-variable "my_ip_cidr" {
-  description = "Your IP CIDR block for SSH access "
-  type        = string
-  default     = "0.0.0.0/0"  
+# toggles----
+variable "enable_bastion" {
+  description = "Toggle to enable/disable bastion host"
+  type        = bool
+  default     = false
 }
 
 variable "web_server_enabled" {
@@ -45,21 +42,26 @@ variable "web_server_enabled" {
   default     = false
 }
 
-variable "web_server_ami" {
-  description = "AMI ID for the web server"
-  type        = string
+variable "enable_app_server" {
+  type = bool
+  default = false 
+  description = "Toggle to enable/disable app server"
 }
 
-variable "web_server_instance_type" {
+variable "enable_db_server" {
+  type = bool
+  default = false 
+  description = "Toggle to enable/disable db server"
+}
+
+
+variable "instance_type" {
   description = "Instance type for web server"
   type        = string
   default     = "t2.micro"
 }
 
-variable "nat_instance_ami" {
-  type        = string
-  description = "AMI ID for the NAT Instance"
-  # You should use an Amazon Linux 2 AMI configured for NAT
-  # The exact AMI ID will depend on your region
-  # Example for us-east-1: "ami-0c55b159cbfafe1f0"
+
+variable "ami_id" {
+  type = string
 }
