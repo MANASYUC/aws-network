@@ -13,3 +13,8 @@ variable "ssh_key_name" {
 variable "my_ip_cidr" {
   type = string
 }
+
+variable "enable_bastion" {
+  type = bool
+  default = false
+}

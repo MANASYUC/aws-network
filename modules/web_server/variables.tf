@@ -1,6 +1,6 @@
 variable "vpc_id" {}
 
-variable "enabled" {
+variable "enable_web_server" {
   description = "Toggle to enable or disable web server"
   type        = bool
   default     = false

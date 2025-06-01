@@ -38,3 +38,20 @@ variable "my_ip_cidr" {
   type        = string
   default     = "0.0.0.0/0"  
 }
+
+variable "web_server_enabled" {
+  description = "Set true to deploy web server"
+  type        = bool
+  default     = false
+}
+
+variable "web_server_ami" {
+  description = "AMI ID for the web server"
+  type        = string
+}
+
+variable "web_server_instance_type" {
+  description = "Instance type for web server"
+  type        = string
+  default     = "t2.micro"
+}

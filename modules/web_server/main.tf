@@ -24,7 +24,7 @@ resource "aws_security_group" "web_server_sg" {
     from_port       = 22
     to_port         = 22
     protocol        = "tcp"
-    security_groups = [var.bastion_sg_id]   # This is correct
+    security_groups = [var.bastion_sg_id]   
   }
 
   egress {
@@ -40,7 +40,7 @@ resource "aws_security_group" "web_server_sg" {
 }
 
 resource "aws_instance" "web" {
-  count                       = var.enabled ? 1 : 0
+  count                       = var.enable_web_server ? 1 : 0
   ami                         = var.ami_id
   instance_type               = var.instance_type
   subnet_id                   = var.subnet_id

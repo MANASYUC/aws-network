@@ -23,8 +23,9 @@ data "aws_subnet" "public_subnet" {
 }
 
 resource "aws_instance" "bastion" {
+  count                       = var.enable_bastion ? 1 : 0
   ami                         = var.bastion_ami
-  instance_type               = "t3.micro"
+  instance_type               = "t2.micro"
   subnet_id                   = var.public_subnet_id
   key_name                    = var.ssh_key_name
   vpc_security_group_ids      = [aws_security_group.bastion_sg.id]
