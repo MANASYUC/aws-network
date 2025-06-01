@@ -9,15 +9,17 @@ module "gateways" {
   source            = "./modules/gateway"
   vpc_id            = module.vpc.vpc_id
   public_subnet_ids = module.vpc.public_subnets_ids
+  vpc_cidr          = module.vpc.vpc_cidr
+  nat_instance_ami  = var.nat_instance_ami
 }
 
 module "routing" {
   source              = "./modules/routing"
   vpc_id              = module.vpc.vpc_id
-  igw_id              = module.gateways.internet_gateway_id
+  igw_id              = module.gateways.internet_gateway_id  
   public_subnet_ids   = module.vpc.public_subnets_ids
   private_subnet_ids  = module.vpc.private_subnets_ids
-  nat_gateway_ids     = module.gateways.nat_gateway_ids
+  nat_instance_eni_id = module.gateways.nat_instance_eni_id
 }
 
 module "security" {

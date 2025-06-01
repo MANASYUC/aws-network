@@ -19,24 +19,23 @@ resource "aws_route_table_association" "public_assocs" {
   route_table_id = aws_route_table.public_rt.id
 }
 
-# Create route tables for each private subnet using corresponding NAT GW
-resource "aws_route_table" "private_rts" {
-  count  = length(var.private_subnet_ids)
+# Single route table for private subnets
+resource "aws_route_table" "private_rt" {
   vpc_id = var.vpc_id
 
   route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = var.nat_gateway_ids[count.index]
+    cidr_block           = "0.0.0.0/0"
+    network_interface_id = var.nat_instance_eni_id
   }
 
   tags = {
-    Name = "nat-gw-${count.index + 1}"
+    Name = "private-rt"
   }
 }
 
-# Associate each private subnet to its respective NAT route table
-resource "aws_route_table_association" "private_assocs" {
+# Associate private subnets with the route table
+resource "aws_route_table_association" "private" {
   count          = length(var.private_subnet_ids)
   subnet_id      = var.private_subnet_ids[count.index]
-  route_table_id = aws_route_table.private_rts[count.index].id
+  route_table_id = aws_route_table.private_rt.id
 }

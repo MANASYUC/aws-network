@@ -55,3 +55,11 @@ variable "web_server_instance_type" {
   type        = string
   default     = "t2.micro"
 }
+
+variable "nat_instance_ami" {
+  type        = string
+  description = "AMI ID for the NAT Instance"
+  # You should use an Amazon Linux 2 AMI configured for NAT
+  # The exact AMI ID will depend on your region
+  # Example for us-east-1: "ami-0c55b159cbfafe1f0"
+}
