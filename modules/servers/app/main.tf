@@ -7,20 +7,14 @@ resource "aws_instance" "app" {
 
   user_data = <<-EOF
               #!/bin/bash
-              sudo apt update -y
-              sudo apt install -y python3 python3-pip
-              pip3 install flask mysql-connector-python
-              cat <<EOT > /home/ubuntu/app.py
-              from flask import Flask
-              app = Flask(__name__)
-              @app.route('/')
-              def hello():
-                  return "App Server Running"
-              if __name__ == '__main__':
-                  app.run(host='0.0.0.0', port=80)
-              EOT
-              nohup python3 /home/ubuntu/app.py &
+              apt update -y
+              apt install -y python3-pip
+              pip3 install Flask==2.3.3
+              mkdir -p /opt/test-app
+              cd /opt/test-app
+              nohup python3 app.py > /opt/test-app/app.log 2>&1 &
               EOF
+
 
   tags = {
     Name = "AppServer"

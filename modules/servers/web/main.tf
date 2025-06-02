@@ -54,10 +54,12 @@ resource "aws_instance" "web" {
 
   user_data = <<-EOF
               #!/bin/bash
-              yum update -y
-              yum install -y httpd
-              systemctl start httpd
-              systemctl enable httpd
-              echo "<h1>Web Server via Terraform</h1>" > /var/www/html/index.html
+              apt update -y
+              apt install -y python3-pip
+              pip3 install Flask==2.3.3 requests==2.31.0
+              mkdir -p /opt/test-app
+              cd /opt/test-app
+              nohup python3 app.py > /opt/test-app/web.log 2>&1 &
               EOF
+
 }

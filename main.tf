@@ -97,5 +97,12 @@ module "traffic_client" {
   target_url       = "http://<your-app-server-private-ip-or-dns>"
 }
 
+module "log_s3" {
+  source          = "./modules/s3"
+  log_bucket_name = "my-anomaly-log-bucket-${random_id.bucket_suffix.hex}"
+  tags            = local.common_tags
+}
+
+
 
 
