@@ -24,7 +24,7 @@ resource "aws_instance" "db" {
 # Optional: EBS volume for database storage
 resource "aws_ebs_volume" "db_storage" {
   availability_zone = aws_instance.db.availability_zone
-  size              = 20
+  size              = var.storage_size
   type              = "gp3"
   encrypted         = var.enable_encryption
 

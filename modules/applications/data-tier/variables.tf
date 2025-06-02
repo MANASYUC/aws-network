@@ -44,6 +44,12 @@ variable "db_port" {
   default     = 3306
 }
 
+variable "storage_size" {
+  description = "Size of EBS volume for database storage in GB"
+  type        = number
+  default     = 10
+}
+
 variable "enable_encryption" {
   description = "Enable encryption for database storage"
   type        = bool
