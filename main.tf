@@ -138,9 +138,6 @@ module "web_tier" {
   ami_id              = data.aws_ami.amazon_linux.id
   key_name            = var.existing_key_name
   
-  # Load Balancer
-  enable_load_balancer = var.enable_web_load_balancer
-  
   # Tags
   common_tags = local.common_tags
   

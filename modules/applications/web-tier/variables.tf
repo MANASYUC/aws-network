@@ -44,12 +44,6 @@ variable "key_name" {
   type        = string
 }
 
-variable "enable_load_balancer" {
-  description = "Enable load balancer for web tier"
-  type        = bool
-  default     = true
-}
-
 variable "common_tags" {
   description = "Common tags to apply to all resources"
   type        = map(string)

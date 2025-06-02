@@ -211,12 +211,6 @@ variable "web_instance_type" {
   default     = "t3.small"
 }
 
-variable "enable_web_load_balancer" {
-  description = "Enable load balancer for web tier"
-  type        = bool
-  default     = true
-}
-
 # Application Tier
 variable "enable_app_tier" {
   description = "Enable application tier deployment"
