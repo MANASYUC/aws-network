@@ -1,109 +1,216 @@
-module "vpc" {
-  source               = "./modules/vpc"
+# ====================================
+# NEW IMPROVED MAIN CONFIGURATION
+# ====================================
+# This demonstrates the new layered architecture:
+# Layer 1: Foundation (Network Infrastructure)
+# Layer 2: Platform (Security & Management)  
+# Layer 3: Applications (Workloads)
+# ====================================
+
+# Data sources for dynamic values
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+# ====================================
+# LOCAL VARIABLES
+# ====================================
+
+locals {
+  # Environment configuration
+  environment = var.environment
+  
+  # Network configuration
+  vpc_cidr             = var.vpc_cidr
+  availability_zones   = slice(data.aws_availability_zones.available.names, 0, var.az_count)
   public_subnet_cidrs  = var.public_subnet_cidrs
   private_subnet_cidrs = var.private_subnet_cidrs
-  azs                  = var.azs
-}
-
-module "aws_subnet" {
-  source               = "./modules/vpc"
-  public_subnet_cidrs  = var.private_subnet_cidrs
-  private_subnet_cidrs = var.private_subnet_cidrs
-  azs                  = var.azs
-}
-
-module "gateways" {
-  source            = "./modules/gateway"
-  vpc_id            = module.vpc.vpc_id
-  public_subnet_ids = module.vpc.public_subnets_ids
-  vpc_cidr          = module.vpc.vpc_cidr
-  nat_instance_ami  = var.ami_id
-}
-
-module "routing" {
-  source              = "./modules/routing"
-  vpc_id              = module.vpc.vpc_id
-  igw_id              = module.gateways.internet_gateway_id
-  public_subnet_ids   = module.vpc.public_subnets_ids
-  private_subnet_ids  = module.vpc.private_subnets_ids
-  nat_instance_eni_id = module.gateways.nat_instance_eni_id
-}
-
-module "security" {
-  source                 = "./modules/security"
-  vpc_id                 = module.vpc.vpc_id
-  public_subnet_ids      = module.vpc.public_subnets_ids
-  private_subnet_ids     = module.vpc.private_subnets_ids
-  private_subnet_cidrs   = var.private_subnet_cidrs
-  my_ip_cidr             = var.my_ip_cidr
-  app_server_subnet_cidr = var.private_subnet_cidrs[0]
-}
-
-module "bastion" {
-  source           = "./modules/bastion"
-  count            = var.enable_bastion ? 1 : 0
   
-  bastion_ami      = var.ami_id
-  public_subnet_id = module.vpc.public_subnets_ids[0]
-  ssh_key_name     = var.ssh_key_name
-  my_ip_cidr       = var.my_ip_cidr
-  bastion_sg_id    = module.security.bastion_sg_id
+  # Common tags applied to all resources
+  common_tags = merge(var.common_tags, {
+    Environment   = local.environment
+    Project       = "AWS-Network-Architecture"
+    ManagedBy     = "Terraform"
+    CreatedDate   = formatdate("YYYY-MM-DD", timestamp())
+  })
 }
 
-module "web_server" {
-  source        = "./modules/servers/web"
-  count         = var.enable_web_server ? 1 : 0
+# ====================================
+# LAYER 1: FOUNDATION (NETWORK INFRASTRUCTURE)
+# ====================================
+
+module "foundation" {
+  source = "./modules/foundation"
   
-  vpc_id        = module.vpc.vpc_id
-  subnet_id     = module.vpc.public_subnets_ids[0]
-  ami_id        = var.ami_id
-  instance_type = var.instance_type
-  key_name      = var.ssh_key_name
-  bastion_sg_id = module.security.bastion_sg_id
-  web_sg_id     = module.security.web_sg_id
-}
-
-module "app_server" {
-  source           = "./modules/servers/app"
-  count            = var.enable_app_server ? 1 : 0
+  # Environment
+  environment = local.environment
   
-  ami_id           = var.ami_id
-  instance_type    = var.instance_type
-  subnet_id        = module.vpc.private_subnets_ids[0]
-  key_name         = var.ssh_key_name
-  security_group_id = module.security.app_sg_id
-}
-
-module "db_server" {
-  source           = "./modules/servers/db"
-  count            = var.enable_db_server ? 1 : 0
+  # Network Configuration
+  vpc_cidr              = local.vpc_cidr
+  availability_zones    = local.availability_zones
+  public_subnet_cidrs   = local.public_subnet_cidrs
+  private_subnet_cidrs  = local.private_subnet_cidrs
   
-  ami_id           = var.ami_id
-  instance_type    = var.instance_type
-  subnet_id        = module.vpc.private_subnets_ids[0]
-  key_name         = var.ssh_key_name
-  security_group_id = module.security.db_sg_id
-}
-
-module "traffic_client" {
-  source           = "./modules/traffic_client"
-  count            = var.enable_traffic ? 1 : 0
+  # Feature toggles
+  enable_nat_gateway = var.enable_nat_gateway
+  enable_flow_logs   = var.enable_flow_logs
   
-  ami_id           = var.ami_id
-  instance_type    = var.instance_type
-  subnet_id        = module.vpc.private_subnets_ids[0]
-  key_name         = var.ssh_key_name
-  security_group_id = module.security.traffic_client_sg
-  target_url       = "http://<your-app-server-private-ip-or-dns>"
+  # Tags
+  common_tags = local.common_tags
 }
 
-module "log_s3" {
-  source          = "./modules/s3"
-  log_bucket_name = "my-log-bucket-${random_id.bucket_suffix.hex}"
-  tags            = local.common_tags
+# ====================================
+# LAYER 2: PLATFORM (SECURITY & MANAGEMENT)
+# ====================================
+
+module "platform" {
+  source = "./modules/platform"
+  
+  # Dependencies from foundation layer
+  vpc_id             = module.foundation.vpc_id
+  public_subnet_ids  = module.foundation.public_subnet_ids
+  private_subnet_ids = module.foundation.private_subnet_ids
+  
+  # Environment
+  environment = local.environment
+  
+  # Security Configuration
+  admin_cidr_blocks = var.admin_cidr_blocks
+  app_port         = var.app_port
+  db_port          = var.db_port
+  
+  # Bastion Configuration
+  enable_bastion            = var.enable_bastion
+  bastion_ami_id           = data.aws_ami.amazon_linux.id
+  bastion_instance_type    = var.bastion_instance_type
+  create_bastion_key       = var.create_bastion_key
+  bastion_public_key       = var.bastion_public_key
+  existing_key_name        = var.existing_key_name
+  
+  # Monitoring
+  enable_logging           = var.enable_logging
+  enable_detailed_monitoring = var.enable_detailed_monitoring
+  log_retention_days       = var.log_retention_days
+  
+  # Network Security
+  enable_network_acls = var.enable_network_acls
+  
+  # Tags
+  common_tags = local.common_tags
+  
+  # Explicit dependency
+  depends_on = [module.foundation]
 }
 
+# ====================================
+# LAYER 3: APPLICATIONS (OPTIONAL)
+# ====================================
 
+# Web Tier - Public facing web servers
+module "web_tier" {
+  source = "./modules/applications/web-tier"
+  count  = var.enable_web_tier ? 1 : 0
+  
+  # Dependencies
+  vpc_id                = module.foundation.vpc_id
+  subnet_ids           = module.foundation.public_subnet_ids
+  security_group_id    = module.platform.web_tier_security_group_id
+  
+  # Configuration
+  environment          = local.environment
+  instance_count       = var.web_instance_count
+  instance_type        = var.web_instance_type
+  ami_id              = data.aws_ami.amazon_linux.id
+  key_name            = var.existing_key_name
+  
+  # Load Balancer
+  enable_load_balancer = var.enable_web_load_balancer
+  
+  # Tags
+  common_tags = local.common_tags
+  
+  depends_on = [module.platform]
+}
 
+# App Tier - Application servers in private subnets
+module "app_tier" {
+  source = "./modules/applications/app-tier"
+  count  = var.enable_app_tier ? 1 : 0
+  
+  # Dependencies  
+  vpc_id               = module.foundation.vpc_id
+  subnet_ids          = module.foundation.private_subnet_ids
+  security_group_id   = module.platform.app_tier_security_group_id
+  
+  # Configuration
+  environment         = local.environment
+  instance_count      = var.app_instance_count
+  instance_type       = var.app_instance_type
+  ami_id             = data.aws_ami.amazon_linux.id
+  key_name           = var.existing_key_name
+  app_port           = var.app_port
+  
+  # Tags
+  common_tags = local.common_tags
+  
+  depends_on = [module.platform]
+}
 
+# Data Tier - Database servers
+module "data_tier" {
+  source = "./modules/applications/data-tier"
+  count  = var.enable_data_tier ? 1 : 0
+  
+  # Dependencies
+  vpc_id              = module.foundation.vpc_id
+  subnet_ids         = module.foundation.private_subnet_ids
+  security_group_id  = module.platform.db_tier_security_group_id
+  
+  # Configuration
+  environment        = local.environment
+  instance_type      = var.db_instance_type
+  ami_id            = data.aws_ami.amazon_linux.id
+  key_name          = var.existing_key_name
+  db_port           = var.db_port
+  
+  # Storage
+  enable_encryption = var.enable_db_encryption
+  backup_retention  = var.db_backup_retention
+  
+  # Tags
+  common_tags = local.common_tags
+  
+  depends_on = [module.platform]
+}
 
+# ====================================
+# SHARED SERVICES (OPTIONAL)
+# ====================================
+
+# S3 Buckets for logging and storage
+module "shared_storage" {
+  source = "./modules/shared/storage"
+  count  = var.enable_shared_storage ? 1 : 0
+  
+  environment     = local.environment
+  bucket_prefix   = var.s3_bucket_prefix
+  enable_logging  = var.enable_s3_logging
+  retention_days  = var.s3_retention_days
+  
+  common_tags = local.common_tags
+} 
