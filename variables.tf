@@ -60,6 +60,13 @@ variable "az_count" {
   }
 }
 
+variable "azs" {
+  description = "Availability Zones"
+  type        = list(string)
+  default     = ["us-east-1a", "us-east-1b"]
+}
+
+# Network CIDR blocks
 variable "public_subnet_cidrs" {
   description = "CIDR blocks for public subnets"
   type        = list(string)
@@ -131,8 +138,21 @@ variable "bastion_public_key" {
   default     = ""
 }
 
+variable "my_ip_cidr" {
+  description = "Your IP CIDR block for SSH access"
+  type        = string
+  default     = "0.0.0.0/0"
+}
+
 variable "existing_key_name" {
   description = "Name of existing SSH key pair to use"
+  type        = string
+  default     = ""
+}
+
+# SSH key configuration
+variable "ssh_key_name" {
+  description = "Name of the SSH key pair for EC2 instances"
   type        = string
   default     = ""
 }
@@ -173,6 +193,12 @@ variable "enable_web_tier" {
   default     = false
 }
 
+variable "enable_web_server" {
+  description = "Set true to deploy web server"
+  type        = bool
+  default     = false
+}
+
 variable "web_instance_count" {
   description = "Number of web tier instances"
   type        = number
@@ -198,6 +224,12 @@ variable "enable_app_tier" {
   default     = false
 }
 
+variable "enable_app_server" {
+  description = "Toggle to enable/disable app server"
+  type        = bool
+  default     = false
+}
+
 variable "app_instance_count" {
   description = "Number of application tier instances"
   type        = number
@@ -213,6 +245,12 @@ variable "app_instance_type" {
 # Data Tier
 variable "enable_data_tier" {
   description = "Enable data tier deployment"
+  type        = bool
+  default     = false
+}
+
+variable "enable_db_server" {
+  description = "Toggle to enable/disable db server"
   type        = bool
   default     = false
 }
@@ -245,6 +283,12 @@ variable "enable_shared_storage" {
   default     = false
 }
 
+variable "enable_traffic" {
+  description = "Toggle to enable/disable traffic client"
+  type        = bool
+  default     = false
+}
+
 variable "s3_bucket_prefix" {
   description = "Prefix for S3 bucket names"
   type        = string
@@ -269,32 +313,15 @@ variable "s3_retention_days" {
 # These variables maintain compatibility with the old structure
 # TODO: Remove these in future versions
 
-variable "azs" {
-  description = "[DEPRECATED] Use az_count instead"
-  type        = list(string)
-  default     = ["us-east-1a", "us-east-1b"]
-}
-
-variable "my_ip_cidr" {
-  description = "[DEPRECATED] Use admin_cidr_blocks instead"
-  type        = string
-  default     = "0.0.0.0/0"
-}
-
-variable "ssh_key_name" {
-  description = "[DEPRECATED] Use existing_key_name instead"
-  type        = string
-  default     = ""
-}
-
+# Instance configuration
 variable "instance_type" {
-  description = "[DEPRECATED] Use tier-specific instance types instead"
+  description = "Instance type for EC2 instances"
   type        = string
   default     = "t3.micro"
 }
 
 variable "ami_id" {
-  description = "[DEPRECATED] AMI is now dynamically selected"
+  description = "AMI ID to use for EC2 instances"
   type        = string
   default     = ""
-} 
+}
