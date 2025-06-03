@@ -65,6 +65,12 @@ variable "enable_flow_logs" {
   default     = false
 }
 
+variable "flow_logs_role_arn" {
+  description = "ARN of the IAM role for VPC Flow Logs"
+  type        = string
+  default     = null
+}
+
 variable "common_tags" {
   description = "Common tags to apply to all resources"
   type        = map(string)

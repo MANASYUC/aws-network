@@ -4,11 +4,16 @@ This Terraform configuration creates a scalable, secure AWS network infrastructu
 
 ## 🏗️ Architecture Overview
 
-The infrastructure is organized into **three distinct layers**:
+The infrastructure is organized into **four distinct layers**:
+
+### **Layer 0: IAM (Identity and Access Management)**
+- **Purpose**: Centralized IAM roles and policies
+- **Components**: VPC Flow Logs Role, Future EC2/Lambda/ECS roles
+- **Module**: `modules/iam/`
 
 ### **Layer 1: Foundation (Network Infrastructure)**
 - **Purpose**: Core network components
-- **Components**: VPC, Subnets, Internet Gateway, NAT Gateway, Route Tables
+- **Components**: VPC, Subnets, Internet Gateway, NAT Gateway, Route Tables, VPC Flow Logs
 - **Module**: `modules/foundation/`
 
 ### **Layer 2: Platform (Security & Management)**
@@ -81,6 +86,12 @@ aws-network/
 ├── terraform.tfvars          # Your configuration
 │
 ├── modules/
+│   ├── iam/                 # Layer 0: IAM Resources
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   └── README.md
+│   │
 │   ├── foundation/           # Layer 1: Network Infrastructure
 │   │   ├── main.tf
 │   │   ├── variables.tf

@@ -51,6 +51,27 @@ locals {
 }
 
 # ====================================
+# LAYER 0: IAM (IDENTITY AND ACCESS MANAGEMENT)
+# ====================================
+
+module "iam" {
+  source = "./modules/iam"
+  
+  # Environment
+  environment = local.environment
+  
+  # Feature toggles - IAM roles created based on what's enabled
+  enable_flow_logs    = var.enable_flow_logs
+  enable_admin_role   = var.enable_bastion || var.enable_web_tier || var.enable_app_tier || var.enable_data_tier
+  enable_bastion_role = var.enable_bastion
+  enable_app_roles    = var.enable_app_tier
+  enable_lambda_roles = false  # Set to true when Lambda functions are added
+  
+  # Tags
+  common_tags = local.common_tags
+}
+
+# ====================================
 # LAYER 1: FOUNDATION (NETWORK INFRASTRUCTURE)
 # ====================================
 
@@ -70,8 +91,14 @@ module "foundation" {
   enable_nat_gateway = var.enable_nat_gateway
   enable_flow_logs   = var.enable_flow_logs
   
+  # IAM Dependencies
+  flow_logs_role_arn = module.iam.vpc_flow_logs_role_arn
+  
   # Tags
   common_tags = local.common_tags
+  
+  # Explicit dependency
+  depends_on = [module.iam]
 }
 
 # ====================================
@@ -201,7 +228,7 @@ module "data_tier" {
 
 # S3 Buckets for logging and storage
 module "shared_storage" {
-  source = "./modules/shared/storage"
+  source = "./modules/shared"
   count  = var.enable_shared_storage ? 1 : 0
   
   environment     = local.environment
