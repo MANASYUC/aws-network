@@ -27,22 +27,6 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
-# NAT AMI - Amazon Linux optimized for NAT functionality
-data "aws_ami" "nat_instance" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["amzn-ami-vpc-nat-*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
-
 # ====================================
 # LOCAL VARIABLES
 # ====================================
@@ -108,7 +92,7 @@ module "foundation" {
   enable_flow_logs    = var.enable_flow_logs
   
   # NAT Instance Configuration
-  nat_instance_ami_id   = data.aws_ami.nat_instance.id
+  nat_instance_ami_id   = data.aws_ami.amazon_linux.id
   nat_instance_type     = var.nat_instance_type
   key_name             = var.existing_key_name
   admin_cidr_blocks    = var.admin_cidr_blocks

@@ -133,6 +133,28 @@ resource "aws_instance" "nat" {
   associate_public_ip_address = true
   source_dest_check          = false  # Critical for NAT functionality
 
+  user_data = <<-EOF
+    #!/bin/bash
+    # Update system
+    yum update -y
+    
+    # Enable IP forwarding
+    echo 'net.ipv4.ip_forward = 1' >> /etc/sysctl.conf
+    sysctl -p
+    
+    # Configure iptables for NAT
+    iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+    iptables -A FORWARD -i eth0 -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+    iptables -A FORWARD -i eth0 -o eth0 -j ACCEPT
+    
+    # Save iptables rules permanently
+    service iptables save
+    chkconfig iptables on
+    
+    # Start iptables service
+    service iptables start
+  EOF
+
   tags = merge(var.common_tags, {
     Name = "${var.environment}-nat-instance"
     Type = "Foundation"

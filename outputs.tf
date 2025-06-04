@@ -33,9 +33,14 @@ output "private_subnet_ids" {
   value       = module.foundation.private_subnet_ids
 }
 
-output "nat_gateway_public_ips" {
-  description = "Public IP addresses of NAT Gateways"
-  value       = module.foundation.nat_public_ips
+output "nat_instance_info" {
+  description = "NAT Instance information"
+  value = var.enable_nat_instance ? {
+    instance_id  = module.foundation.nat_instance_id
+    private_ip   = module.foundation.nat_instance_private_ip
+    public_ip    = module.foundation.nat_public_ip
+    security_group_id = module.foundation.nat_security_group_id
+  } : null
 }
 
 # ====================================
@@ -112,7 +117,8 @@ output "deployment_summary" {
     # Key resources
     bastion_enabled     = var.enable_bastion
     bastion_public_ip   = var.enable_bastion ? module.platform.bastion_public_ip : null
-    nat_gateways        = length(module.foundation.nat_gateway_ids)
+    nat_instance_enabled = var.enable_nat_instance
+    nat_instance_ip     = var.enable_nat_instance ? module.foundation.nat_public_ip : null
     public_subnets      = length(module.foundation.public_subnet_ids)
     private_subnets     = length(module.foundation.private_subnet_ids)
     
@@ -130,6 +136,7 @@ output "quick_reference" {
   description = "Quick reference for common operations"
   value = var.enable_bastion ? {
     bastion_ssh       = "ssh -i ${var.existing_key_name}.pem ec2-user@${module.platform.bastion_public_ip}"
+    nat_instance_ssh  = var.enable_nat_instance ? "ssh -i ${var.existing_key_name}.pem ec2-user@${module.foundation.nat_public_ip}" : "NAT Instance disabled"
     view_vpc         = "aws ec2 describe-vpcs --vpc-ids ${module.foundation.vpc_id}"
     view_subnets     = "aws ec2 describe-subnets --filters Name=vpc-id,Values=${module.foundation.vpc_id}"
     view_instances   = "aws ec2 describe-instances --filters Name=vpc-id,Values=${module.foundation.vpc_id}"
