@@ -59,15 +59,25 @@ output "private_subnet_arns" {
   value       = aws_subnet.private[*].arn
 }
 
-# NAT Gateway Information
-output "nat_gateway_ids" {
-  description = "List of IDs of the NAT Gateways"
-  value       = aws_nat_gateway.main[*].id
+# NAT Instance Information
+output "nat_instance_id" {
+  description = "ID of the NAT Instance"
+  value       = var.enable_nat_instance ? aws_instance.nat[0].id : null
 }
 
-output "nat_public_ips" {
-  description = "List of public IP addresses of the NAT Gateways"
-  value       = aws_eip.nat[*].public_ip
+output "nat_instance_private_ip" {
+  description = "Private IP address of the NAT Instance"
+  value       = var.enable_nat_instance ? aws_instance.nat[0].private_ip : null
+}
+
+output "nat_public_ip" {
+  description = "Public IP address of the NAT Instance"
+  value       = var.enable_nat_instance ? aws_eip.nat[0].public_ip : null
+}
+
+output "nat_security_group_id" {
+  description = "Security Group ID of the NAT Instance"
+  value       = var.enable_nat_instance ? aws_security_group.nat_instance[0].id : null
 }
 
 # Route Table Information
@@ -76,9 +86,9 @@ output "public_route_table_id" {
   value       = aws_route_table.public.id
 }
 
-output "private_route_table_ids" {
-  description = "List of IDs of the private route tables"
-  value       = aws_route_table.private[*].id
+output "private_route_table_id" {
+  description = "ID of the private route table"
+  value       = aws_route_table.private.id
 }
 
 # Availability Zone Information
@@ -91,13 +101,13 @@ output "availability_zones" {
 output "network_summary" {
   description = "Summary of the network configuration"
   value = {
-    vpc_id                = aws_vpc.main.id
-    vpc_cidr             = aws_vpc.main.cidr_block
-    environment          = var.environment
-    public_subnets       = length(aws_subnet.public)
-    private_subnets      = length(aws_subnet.private)
-    availability_zones   = length(var.availability_zones)
-    nat_gateways_enabled = var.enable_nat_gateway
-    flow_logs_enabled    = var.enable_flow_logs
+    vpc_id                 = aws_vpc.main.id
+    vpc_cidr              = aws_vpc.main.cidr_block
+    environment           = var.environment
+    public_subnets        = length(aws_subnet.public)
+    private_subnets       = length(aws_subnet.private)
+    availability_zones    = length(var.availability_zones)
+    nat_instance_enabled  = var.enable_nat_instance
+    flow_logs_enabled     = var.enable_flow_logs
   }
 } 

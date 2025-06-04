@@ -73,10 +73,21 @@ variable "private_subnet_cidrs" {
   default     = ["10.0.11.0/24", "10.0.12.0/24"]
 }
 
-variable "enable_nat_gateway" {
-  description = "Enable NAT Gateway for private subnet internet access"
+variable "enable_nat_instance" {
+  description = "Enable NAT Instance for private subnet internet access (free tier friendly)"
   type        = bool
   default     = true
+}
+
+variable "nat_instance_type" {
+  description = "Instance type for NAT instance"
+  type        = string
+  default     = "t2.micro"
+  
+  validation {
+    condition     = contains(["t2.micro", "t2.small", "t3.micro", "t3.small"], var.nat_instance_type)
+    error_message = "NAT instance type should be small for cost efficiency."
+  }
 }
 
 variable "enable_flow_logs" {
@@ -117,7 +128,7 @@ variable "enable_bastion" {
 variable "bastion_instance_type" {
   description = "Instance type for bastion host"
   type        = string
-  default     = "t3.micro"
+  default     = "t2.micro"
 }
 
 variable "create_bastion_key" {
@@ -183,7 +194,7 @@ variable "web_instance_count" {
 variable "web_instance_type" {
   description = "Instance type for web tier"
   type        = string
-  default     = "t3.small"
+  default     = "t2.micro"
 }
 
 # Application Tier
@@ -202,7 +213,7 @@ variable "app_instance_count" {
 variable "app_instance_type" {
   description = "Instance type for application tier"
   type        = string
-  default     = "t3.medium"
+  default     = "t2.micro"
 }
 
 # Data Tier
@@ -215,7 +226,7 @@ variable "enable_data_tier" {
 variable "db_instance_type" {
   description = "Instance type for database tier"
   type        = string
-  default     = "t3.medium"
+  default     = "t2.micro"
 }
 
 variable "enable_db_encryption" {
@@ -228,6 +239,11 @@ variable "db_backup_retention" {
   description = "Database backup retention period in days"
   type        = number
   default     = 7
+  
+  validation {
+    condition     = var.db_backup_retention >= 1 && var.db_backup_retention <= 35
+    error_message = "Backup retention must be between 1 and 35 days."
+  }
 }
 
 # ====================================
@@ -235,7 +251,7 @@ variable "db_backup_retention" {
 # ====================================
 
 variable "enable_shared_storage" {
-  description = "Enable shared S3 storage"
+  description = "Enable shared S3 storage resources"
   type        = bool
   default     = false
 }
@@ -243,13 +259,13 @@ variable "enable_shared_storage" {
 variable "s3_bucket_prefix" {
   description = "Prefix for S3 bucket names"
   type        = string
-  default     = "aws-network-arch"
+  default     = "aws-network"
 }
 
 variable "enable_s3_logging" {
   description = "Enable S3 access logging"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "s3_retention_days" {

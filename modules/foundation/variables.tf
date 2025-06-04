@@ -53,10 +53,34 @@ variable "private_subnet_cidrs" {
   }
 }
 
-variable "enable_nat_gateway" {
-  description = "Enable NAT Gateway for private subnet internet access"
+variable "enable_nat_instance" {
+  description = "Enable NAT Instance for private subnet internet access (free tier friendly)"
   type        = bool
   default     = true
+}
+
+variable "nat_instance_ami_id" {
+  description = "AMI ID for the NAT instance"
+  type        = string
+  default     = ""
+}
+
+variable "nat_instance_type" {
+  description = "Instance type for NAT instance"
+  type        = string
+  default     = "t2.micro"
+}
+
+variable "key_name" {
+  description = "Name of the SSH key pair for NAT instance"
+  type        = string
+  default     = ""
+}
+
+variable "admin_cidr_blocks" {
+  description = "CIDR blocks allowed for administrative access"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
 }
 
 variable "enable_flow_logs" {

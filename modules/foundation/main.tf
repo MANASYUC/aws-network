@@ -5,7 +5,7 @@
 # - VPC with DNS support
 # - Public & Private subnets across AZs  
 # - Internet Gateway for public access
-# - NAT Gateway for private subnet internet access
+# - NAT Instance for private subnet internet access (free tier friendly)
 # - Route tables and associations
 # ====================================
 
@@ -60,31 +60,93 @@ resource "aws_subnet" "private" {
   })
 }
 
-# Elastic IP for NAT Gateway
+# Security Group for NAT Instance
+resource "aws_security_group" "nat_instance" {
+  count       = var.enable_nat_instance ? 1 : 0
+  name        = "${var.environment}-nat-instance-sg"
+  description = "Security group for NAT instance"
+  vpc_id      = aws_vpc.main.id
+
+  # Allow HTTP traffic from private subnets
+  ingress {
+    description = "HTTP from private subnets"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = var.private_subnet_cidrs
+  }
+
+  # Allow HTTPS traffic from private subnets
+  ingress {
+    description = "HTTPS from private subnets"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = var.private_subnet_cidrs
+  }
+
+  # Allow SSH from admin networks (for troubleshooting)
+  ingress {
+    description = "SSH from admin"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = var.admin_cidr_blocks
+  }
+
+  # Allow all outbound traffic
+  egress {
+    description = "All outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(var.common_tags, {
+    Name = "${var.environment}-nat-instance-sg"
+    Type = "Foundation"
+  })
+}
+
+# Elastic IP for NAT Instance
 resource "aws_eip" "nat" {
-  count  = var.enable_nat_gateway ? length(var.public_subnet_cidrs) : 0
+  count  = var.enable_nat_instance ? 1 : 0
   domain = "vpc"
 
   depends_on = [aws_internet_gateway.main]
 
   tags = merge(var.common_tags, {
-    Name = "${var.environment}-nat-eip-${count.index + 1}"
+    Name = "${var.environment}-nat-eip"
     Type = "Foundation"
   })
 }
 
-# NAT Gateway - Enables outbound internet access for private subnets
-resource "aws_nat_gateway" "main" {
-  count         = var.enable_nat_gateway ? length(var.public_subnet_cidrs) : 0
-  allocation_id = aws_eip.nat[count.index].id
-  subnet_id     = aws_subnet.public[count.index].id
+# NAT Instance - Free tier friendly alternative to NAT Gateway
+resource "aws_instance" "nat" {
+  count                       = var.enable_nat_instance ? 1 : 0
+  ami                        = var.nat_instance_ami_id
+  instance_type              = var.nat_instance_type
+  key_name                   = var.key_name
+  vpc_security_group_ids     = [aws_security_group.nat_instance[0].id]
+  subnet_id                  = aws_subnet.public[0].id
+  associate_public_ip_address = true
+  source_dest_check          = false  # Critical for NAT functionality
 
   tags = merge(var.common_tags, {
-    Name = "${var.environment}-nat-gateway-${count.index + 1}"
+    Name = "${var.environment}-nat-instance"
     Type = "Foundation"
+    Role = "NAT"
   })
 
   depends_on = [aws_internet_gateway.main]
+}
+
+# Associate Elastic IP with NAT Instance
+resource "aws_eip_association" "nat" {
+  count       = var.enable_nat_instance ? 1 : 0
+  instance_id = aws_instance.nat[0].id
+  allocation_id = aws_eip.nat[0].id
 }
 
 # Public Route Table - Routes traffic to Internet Gateway
@@ -109,22 +171,21 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-# Private Route Tables - One per AZ for high availability
+# Private Route Table - Routes traffic through NAT Instance
 resource "aws_route_table" "private" {
-  count  = var.enable_nat_gateway ? length(var.private_subnet_cidrs) : 1
   vpc_id = aws_vpc.main.id
 
-  # Only add NAT route if NAT Gateway is enabled
+  # Add route to NAT Instance if enabled
   dynamic "route" {
-    for_each = var.enable_nat_gateway ? [1] : []
+    for_each = var.enable_nat_instance ? [1] : []
     content {
-      cidr_block     = "0.0.0.0/0"
-      nat_gateway_id = aws_nat_gateway.main[count.index % length(aws_nat_gateway.main)].id
+      cidr_block           = "0.0.0.0/0"
+      network_interface_id = aws_instance.nat[0].primary_network_interface_id
     }
   }
 
   tags = merge(var.common_tags, {
-    Name = "${var.environment}-private-rt-${count.index + 1}"
+    Name = "${var.environment}-private-rt"
     Type = "Private"
   })
 }
@@ -133,7 +194,7 @@ resource "aws_route_table" "private" {
 resource "aws_route_table_association" "private" {
   count          = length(aws_subnet.private)
   subnet_id      = aws_subnet.private[count.index].id
-  route_table_id = aws_route_table.private[count.index % length(aws_route_table.private)].id
+  route_table_id = aws_route_table.private.id
 }
 
 # VPC Flow Logs for network monitoring (optional)
