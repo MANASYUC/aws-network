@@ -1,4 +1,5 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 # AWS Network Infrastructure - Improved Architecture
 
 This Terraform configuration creates a scalable, secure AWS network infrastructure using a layered architectural approach.
@@ -45,6 +46,8 @@ The infrastructure is organized into **four distinct layers**:
 
 ### **1. Minimal Setup (Foundation + Platform Only)**
 =======
+=======
+>>>>>>> Stashed changes
 # AWS Network Infrastructure for ML Training
 
 A comprehensive Terraform project for deploying AWS network infrastructure with three focused deployment modes for different learning goals and budgets.
@@ -81,11 +84,15 @@ cd modes/full/          # Enterprise learning
 ```
 
 ### **2. Configure and Deploy:**
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 ```bash
 # Copy example configuration
 cp terraform.tfvars.example terraform.tfvars
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 # Edit terraform.tfvars and set:
 environment = "dev"
@@ -94,16 +101,22 @@ enable_bastion = true
 
 # Deploy
 =======
+=======
+>>>>>>> Stashed changes
 # Edit with your settings (required!)
 nano terraform.tfvars
 
 # Deploy infrastructure
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 terraform init
 terraform plan
 terraform apply
 ```
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 This creates:
 - VPC with public/private subnets
@@ -329,6 +342,8 @@ When extending this architecture:
 
 **Architecture designed for**: Scalability, Security, Maintainability, Cost-effectiveness 
 =======
+=======
+>>>>>>> Stashed changes
 ### **3. Required Configuration:**
 Before deploying any mode, you MUST update:
 ```hcl
@@ -556,5 +571,9 @@ terraform destroy       # Clean up resources
 
 **🚀 Ready to start? Choose your mode above and begin your AWS learning journey!**
 
+<<<<<<< Updated upstream
+**💡 Not sure? Start with [ML-Focused Mode](modes/ml-focused/) - it's the sweet spot for most learners.** 
+>>>>>>> Stashed changes
+=======
 **💡 Not sure? Start with [ML-Focused Mode](modes/ml-focused/) - it's the sweet spot for most learners.** 
 >>>>>>> Stashed changes
