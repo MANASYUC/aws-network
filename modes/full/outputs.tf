@@ -68,7 +68,37 @@ output "bastion_connection_info" {
 }
 
 # ====================================
+<<<<<<< Updated upstream:outputs.tf
 # APPLICATION LAYER OUTPUTS (CONDITIONAL)
+=======
+# S3 STORAGE INFORMATION
+# ====================================
+
+output "s3_buckets" {
+  description = "S3 buckets for ML data storage"
+  value = length(module.ml_storage) > 0 ? {
+    app_storage_bucket = module.ml_storage[0].app_storage_bucket_id
+    logs_bucket       = module.ml_storage[0].logs_bucket_id
+    bucket_arns = {
+      app_storage = module.ml_storage[0].app_storage_bucket_arn
+      logs        = module.ml_storage[0].logs_bucket_arn
+    }
+  } : null
+}
+
+output "data_export_info" {
+  description = "Information about ML data export"
+  value = {
+    s3_export_enabled = var.enable_data_export
+    export_bucket     = var.export_bucket_name
+    storage_available = length(module.ml_storage) > 0 ? "enabled" : "disabled"
+    retention_policy  = "30 days Standard → 90 days Glacier → Auto-delete"
+  }
+}
+
+# ====================================
+# ACCESS COMMANDS & MANAGEMENT
+>>>>>>> Stashed changes:modes/full/outputs.tf
 # ====================================
 
 output "web_tier_info" {

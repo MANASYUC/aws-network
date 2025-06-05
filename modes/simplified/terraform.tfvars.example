@@ -1,0 +1,60 @@
+# ====================================
+# SIMPLIFIED MODE CONFIGURATION
+# ====================================
+# Free Tier optimized ML data generation
+# Copy this to terraform.tfvars and customize
+
+# REQUIRED SETTINGS (Must Change These)
+# ====================================
+existing_key_name = "my-key-pair"                    # Your EC2 key pair name
+admin_cidr_blocks = ["YOUR.IP.ADDRESS/32"]           # Your IP address for security
+
+# BASIC CONFIGURATION
+# ====================================
+environment = "ml-dev"                               # Environment name
+region      = "us-east-1"                           # AWS region
+
+# INSTANCE CONFIGURATION (Free Tier Optimized)
+# ====================================
+web_server_type   = "t3.micro"                      # Web server instance type
+traffic_gen_type  = "t3.micro"                      # Traffic generator instance type  
+nat_instance_type = "t3.nano"                       # NAT instance type (cost optimization)
+
+# SECURITY CONFIGURATION
+# ====================================
+app_port = 8080                                     # Custom application port
+
+# LOGGING CONFIGURATION (Free Tier Optimized)
+# ====================================
+enable_flow_logs       = true                       # VPC Flow Logs for ML data
+enable_cloudwatch_logs = true                       # CloudWatch logging
+
+# TAGGING
+# ====================================
+common_tags = {
+  Project     = "AWS-Network-Learning"
+  Environment = "Development"
+  Owner       = "Your-Name"
+  Purpose     = "ML-Training-Data-Generation"
+  CostCenter  = "Learning"
+  Mode        = "Simplified"
+}
+
+# ====================================
+# SIMPLIFIED MODE FEATURES
+# ====================================
+# This mode includes:
+# ✅ 2 EC2 instances (Web server + Traffic generator)
+# ✅ 1 NAT instance (Internet access for private subnet)
+# ✅ VPC with public/private subnets
+# ✅ S3 buckets for ML data storage
+# ✅ CloudWatch logs for monitoring
+# ✅ VPC Flow Logs for network analysis
+# ✅ Basic security groups
+
+# Estimated Cost: ~$0-15/month (Free Tier friendly)
+
+# Quick Start:
+# 1. Update existing_key_name with your EC2 key pair
+# 2. Update admin_cidr_blocks with your IP address
+# 3. Run: terraform init && terraform apply 
