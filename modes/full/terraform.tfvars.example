@@ -1,0 +1,131 @@
+# ====================================
+# FULL ENTERPRISE MODE CONFIGURATION
+# ====================================
+# Complete 3-tier enterprise infrastructure for comprehensive AWS learning
+# Copy this to terraform.tfvars and customize
+
+# REQUIRED SETTINGS (Must Change These)
+# ====================================
+existing_key_name = "my-key-pair"                    # Your EC2 key pair name
+admin_cidr_blocks = ["YOUR.IP.ADDRESS/32"]           # Your IP address for security
+
+# BASIC CONFIGURATION
+# ====================================
+environment = "enterprise-dev"                       # Environment name
+region      = "us-east-1"                           # AWS region
+
+# NETWORK CONFIGURATION
+# ====================================
+vpc_cidr = "10.0.0.0/16"                            # VPC CIDR block
+az_count = 3                                         # Number of Availability Zones
+
+# Subnet Configuration
+public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
+
+# INSTANCE CONFIGURATION
+# ====================================
+# NAT Instance
+nat_instance_type = "t3.nano"                       # NAT instance type
+
+# Bastion Host
+bastion_instance_type = "t3.micro"                  # Bastion host instance type
+
+# Web Tier
+web_instance_type  = "t3.micro"                     # Web server instance type
+web_instance_count = 2                              # Number of web servers
+
+# App Tier  
+app_instance_type  = "t3.micro"                     # App server instance type
+app_instance_count = 2                              # Number of app servers
+
+# Data Tier
+db_instance_type = "t3.micro"                       # Database instance type
+
+# SECURITY CONFIGURATION
+# ====================================
+app_port = 3000                                     # Application port
+db_port  = 5432                                     # Database port
+
+# FEATURE TOGGLES
+# ====================================
+# Core Infrastructure
+enable_nat_instance = true                          # NAT instance for internet access
+enable_flow_logs    = true                          # VPC Flow Logs
+
+# Platform Features
+enable_bastion      = true                          # Bastion host for secure access
+enable_network_acls = true                          # Network ACLs for additional security
+
+# Application Tiers
+enable_web_tier  = true                             # Web tier deployment
+enable_app_tier  = true                             # Application tier deployment
+enable_data_tier = true                             # Data tier deployment
+
+# MONITORING AND LOGGING
+# ====================================
+enable_logging           = true                     # CloudWatch logging
+enable_detailed_monitoring = true                   # Enhanced monitoring
+log_retention_days       = 7                        # Log retention period
+
+# TAGGING
+# ====================================
+common_tags = {
+  Project     = "AWS-Enterprise-Architecture-Learning"
+  Environment = "Development"
+  Owner       = "Your-Name"
+  Purpose     = "Complete-Infrastructure-Learning"
+  CostCenter  = "Learning"
+  Tier        = "Full-Enterprise"
+  Mode        = "Full"
+}
+
+# ====================================
+# FULL MODE FEATURES
+# ====================================
+# This mode includes:
+# ✅ Complete 3-tier architecture (Web, App, Data)
+# ✅ IAM roles and policies
+# ✅ Bastion host for secure access
+# ✅ Auto Scaling Groups (future enhancement)
+# ✅ Load Balancers (future enhancement)
+# ✅ Advanced monitoring and logging
+# ✅ Network ACLs for security
+# ✅ Multi-AZ deployment
+# ✅ Enterprise security groups
+# ✅ Comprehensive VPC setup
+
+# Architecture Overview:
+# 🌐 Public Subnets: Web tier, Bastion host, NAT instance
+# 🔒 Private Subnets: App tier, Data tier
+# 🛡️  Security: Multiple security groups, Network ACLs, IAM roles
+# 📊 Monitoring: CloudWatch logs, VPC Flow Logs, detailed monitoring
+
+# Estimated Cost: ~$50-100/month
+# Learning Objectives: Enterprise architecture, security, scalability, monitoring
+
+# Quick Start:
+# 1. Update existing_key_name with your EC2 key pair
+# 2. Update admin_cidr_blocks with your IP address
+# 3. Customize network and instance configurations
+# 4. Run: terraform init && terraform apply
+
+# Advanced Configuration Examples:
+# =====================================
+
+# High availability setup:
+# web_instance_count = 3
+# app_instance_count = 3
+# az_count = 3
+
+# Enhanced security:
+# enable_network_acls = true
+# enable_detailed_monitoring = true
+
+# Extended logging:
+# log_retention_days = 30
+
+# Cost optimization:
+# web_instance_type = "t3.nano"
+# app_instance_type = "t3.nano"
+# db_instance_type = "t3.nano" 

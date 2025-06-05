@@ -49,30 +49,56 @@ resource "aws_s3_bucket_public_access_block" "app_storage" {
   restrict_public_buckets = true
 }
 
-# Lifecycle configuration
+# Lifecycle configuration (FREE TIER OPTIMIZED)
 resource "aws_s3_bucket_lifecycle_configuration" "app_storage" {
   bucket = aws_s3_bucket.app_storage.id
 
+  # OPTIMIZATION 5: Aggressive cleanup for free tier (stay under 5GB)
   rule {
-    id     = "transition_to_ia"
+    id     = "ml_training_data_lifecycle"
     status = "Enabled"
 
+    # Only keep processed ML datasets, not raw logs
     filter {
-      prefix = ""
+      prefix = "ml-datasets/"
     }
 
     transition {
-      days          = 30
+      days          = 7   # Move to cheaper storage quickly
       storage_class = "STANDARD_IA"
     }
 
     transition {
-      days          = 90
+      days          = 14  # Move to cheapest storage
       storage_class = "GLACIER"
     }
 
     expiration {
-      days = var.retention_days
+      days = 30  # Delete after 30 days (vs 90)
+    }
+  }
+
+  # OPTIMIZATION 6: Quick cleanup of raw logs/temp data
+  rule {
+    id     = "temp_data_cleanup"
+    status = "Enabled"
+
+    filter {
+      prefix = "temp/"
+    }
+
+    expiration {
+      days = 3  # Delete temp data after 3 days
+    }
+  }
+
+  # OPTIMIZATION 7: Clean up failed/incomplete uploads
+  rule {
+    id     = "incomplete_uploads"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 1
     }
   }
 }

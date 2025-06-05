@@ -1,0 +1,101 @@
+# ====================================
+# ML-FOCUSED MODE CONFIGURATION
+# ====================================
+# Enhanced ML training data generation with comprehensive anomaly detection
+# Copy this to terraform.tfvars and customize
+
+# REQUIRED SETTINGS (Must Change These)
+# ====================================
+existing_key_name = "my-key-pair"                    # Your EC2 key pair name
+admin_cidr_blocks = ["YOUR.IP.ADDRESS/32"]           # Your IP address for security
+
+# BASIC CONFIGURATION
+# ====================================
+environment = "ml-dev"                               # Environment name
+region      = "us-east-1"                           # AWS region
+
+# INSTANCE CONFIGURATION
+# ====================================
+web_server_type      = "t3.micro"                   # Web server instance type
+traffic_gen_type     = "t3.micro"                   # Traffic generator instance type  
+nat_instance_type    = "t3.nano"                    # NAT instance type (cost optimization)
+bastion_instance_type = "t3.micro"                  # Bastion host instance type
+
+# SECURITY CONFIGURATION
+# ====================================
+app_port = 8080                                     # Custom application port
+
+# ML-SPECIFIC CONFIGURATION
+# ====================================
+ml_bucket_prefix    = "ml-network-anomaly-data"     # S3 bucket prefix for ML datasets
+traffic_intensity   = "medium"                      # Traffic generation: low, medium, high
+enable_data_export  = true                          # Automated ML data export to S3
+export_schedule     = "0 * * * *"                   # Hourly data export
+
+# LOGGING CONFIGURATION (Optimized for ML + Free Tier)
+# ====================================
+enable_flow_logs       = true                       # VPC Flow Logs (essential for network anomaly detection)
+enable_cloudwatch_logs = true                       # CloudWatch logging
+log_retention_days     = 1                          # CloudWatch retention (1-3 days for free tier)
+s3_retention_days      = 90                         # S3 dataset retention
+
+# OPTIONAL FEATURES
+# ====================================
+enable_bastion            = false                   # Bastion host for secure access
+enable_enhanced_monitoring = false                  # Enhanced CloudWatch monitoring
+
+# TAGGING
+# ====================================
+common_tags = {
+  Project     = "AWS-Network-Learning"
+  Environment = "Development"
+  Owner       = "Your-Name"
+  Purpose     = "Anomaly-Detection-Training"
+  CostCenter  = "Learning"
+  DataTypes   = "Network,Auth,System,App,TimeSeries"
+  Mode        = "ML-Focused"
+}
+
+# ====================================
+# ML-FOCUSED MODE FEATURES
+# ====================================
+# This mode includes:
+# ✅ Enhanced ML data generators (comprehensive anomaly detection)
+# ✅ Advanced data collection (5 data layers)
+# ✅ Feature engineering (JSON vectors)
+# ✅ Smart sampling (normal + anomalous patterns)
+# ✅ Automated S3 export with compression
+# ✅ Time-series data collection
+# ✅ Optional bastion host
+# ✅ Advanced monitoring capabilities
+
+# Data Types Collected:
+# 🔍 Network Patterns: VPC Flow Logs, HTTP traffic, connection patterns
+# 🔐 Authentication: Login events, brute force attempts, timing patterns
+# 🖥️  System Behavior: CPU/memory usage, process patterns, errors
+# 📱 Application Metrics: Response times, status codes, user agents
+# ⏰ Time-Series: Hourly patterns, performance trends, temporal anomalies
+
+# Estimated Cost: ~$15-25/month
+# ML Algorithms Supported: Isolation Forest, One-Class SVM, Autoencoders, LSTM, Random Forest
+
+# Quick Start:
+# 1. Update existing_key_name with your EC2 key pair
+# 2. Update admin_cidr_blocks with your IP address
+# 3. Customize traffic_intensity and other ML settings
+# 4. Run: terraform init && terraform apply
+
+# Advanced Configuration Examples:
+# =====================================
+
+# High-intensity traffic generation:
+# traffic_intensity = "high"
+# log_retention_days = 3
+# enable_enhanced_monitoring = true
+
+# With bastion host for secure access:
+# enable_bastion = true
+
+# Extended data retention:
+# s3_retention_days = 180
+# log_retention_days = 7 
