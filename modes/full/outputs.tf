@@ -19,7 +19,7 @@ output "deployed_modules" {
     mode = var.deployment_mode
     ml_modules = var.deployment_mode == "simplified" || var.deployment_mode == "ml-focused" ? [
       "ml-network",
-      "ml-generators", 
+      "ml-generators",
       "ml-security"
     ] : []
     full_modules = var.deployment_mode == "full" ? [
@@ -41,7 +41,7 @@ output "vpc_id" {
   description = "ID of the VPC"
   value = var.deployment_mode == "full" ? (
     length(module.foundation) > 0 ? module.foundation[0].vpc_id : null
-  ) : (
+    ) : (
     length(module.ml_network) > 0 ? module.ml_network[0].vpc_id : null
   )
 }
@@ -50,7 +50,7 @@ output "vpc_cidr" {
   description = "CIDR block of the VPC"
   value = var.deployment_mode == "full" ? (
     length(module.foundation) > 0 ? module.foundation[0].vpc_cidr_block : null
-  ) : (
+    ) : (
     length(module.ml_network) > 0 ? module.ml_network[0].vpc_cidr_block : null
   )
 }
@@ -59,7 +59,7 @@ output "public_subnet_ids" {
   description = "IDs of the public subnets"
   value = var.deployment_mode == "full" ? (
     length(module.foundation) > 0 ? module.foundation[0].public_subnet_ids : []
-  ) : (
+    ) : (
     length(module.ml_network) > 0 ? module.ml_network[0].public_subnet_ids : []
   )
 }
@@ -68,7 +68,7 @@ output "private_subnet_ids" {
   description = "IDs of the private subnets"
   value = var.deployment_mode == "full" ? (
     length(module.foundation) > 0 ? module.foundation[0].private_subnet_ids : []
-  ) : (
+    ) : (
     length(module.ml_network) > 0 ? module.ml_network[0].private_subnet_ids : []
   )
 }
@@ -114,29 +114,29 @@ output "bastion_host_ip" {
 output "bastion_connection_info" {
   description = "Information for connecting to the bastion host"
   value = var.deployment_mode == "full" && var.enable_bastion && length(module.platform) > 0 ? {
-    instance_id  = module.platform[0].bastion_instance_id
-    public_ip    = module.platform[0].bastion_public_ip
-    private_ip   = module.platform[0].bastion_private_ip
-    ssh_command  = module.platform[0].bastion_ssh_command
+    instance_id = module.platform[0].bastion_instance_id
+    public_ip   = module.platform[0].bastion_public_ip
+    private_ip  = module.platform[0].bastion_private_ip
+    ssh_command = module.platform[0].bastion_ssh_command
   } : null
 }
 
 output "nat_instance_info" {
   description = "NAT Instance information"
   value = var.enable_nat_instance ? {
-    instance_id  = var.deployment_mode == "full" ? (
+    instance_id = var.deployment_mode == "full" ? (
       length(module.foundation) > 0 ? module.foundation[0].nat_instance_id : null
-    ) : (
+      ) : (
       length(module.ml_network) > 0 ? module.ml_network[0].nat_instance_id : null
     )
-    private_ip   = var.deployment_mode == "full" ? (
+    private_ip = var.deployment_mode == "full" ? (
       length(module.foundation) > 0 ? module.foundation[0].nat_instance_private_ip : null
-    ) : (
+      ) : (
       length(module.ml_network) > 0 ? module.ml_network[0].nat_instance_private_ip : null
     )
-    public_ip    = var.deployment_mode == "full" ? (
+    public_ip = var.deployment_mode == "full" ? (
       length(module.foundation) > 0 ? module.foundation[0].nat_public_ip : null
-    ) : (
+      ) : (
       length(module.ml_network) > 0 ? module.ml_network[0].nat_public_ip : null
     )
   } : null
@@ -175,7 +175,7 @@ output "flow_logs_group" {
   description = "CloudWatch log group for VPC flow logs"
   value = var.deployment_mode == "full" ? (
     var.enable_flow_logs && length(module.foundation) > 0 ? module.foundation[0].flow_logs_group_name : null
-  ) : (
+    ) : (
     length(module.ml_data_generators) > 0 ? module.ml_data_generators[0].flow_logs_group_name : null
   )
 }
@@ -193,7 +193,7 @@ output "s3_buckets" {
   description = "S3 buckets for ML data storage"
   value = length(module.ml_storage) > 0 ? {
     app_storage_bucket = module.ml_storage[0].app_storage_bucket_id
-    logs_bucket       = module.ml_storage[0].logs_bucket_id
+    logs_bucket        = module.ml_storage[0].logs_bucket_id
     bucket_arns = {
       app_storage = module.ml_storage[0].app_storage_bucket_arn
       logs        = module.ml_storage[0].logs_bucket_arn
@@ -219,9 +219,9 @@ output "ssh_commands" {
   description = "SSH commands for accessing instances"
   value = {
     web_server = length(module.ml_data_generators) > 0 ? "ssh -i your-key.pem ec2-user@${module.ml_data_generators[0].web_server_public_ip}" : "Not available"
-    
+
     bastion = var.deployment_mode == "full" && length(module.platform) > 0 ? "ssh -i your-key.pem ec2-user@${module.platform[0].bastion_public_ip}" : "Not available"
-    
+
     traffic_generator = length(module.ml_data_generators) > 0 ? "Connect via bastion or NAT instance to ${module.ml_data_generators[0].traffic_generator_private_ip}" : "Not available"
   }
 }
@@ -229,12 +229,12 @@ output "ssh_commands" {
 output "management_commands" {
   description = "Management commands for ML traffic generation"
   value = length(module.ml_data_generators) > 0 ? {
-    traffic_status      = "sudo /opt/ml-traffic-gen/control.sh status"
-    start_traffic      = "sudo /opt/ml-traffic-gen/control.sh start" 
-    stop_traffic       = "sudo /opt/ml-traffic-gen/control.sh stop"
-    view_normal_logs   = "tail -f /var/log/normal_traffic.log"
-    view_attack_logs   = "tail -f /var/log/attack_patterns.log"
-    check_web_logs     = "tail -f /var/log/httpd/access_log"
+    traffic_status   = "sudo /opt/ml-traffic-gen/control.sh status"
+    start_traffic    = "sudo /opt/ml-traffic-gen/control.sh start"
+    stop_traffic     = "sudo /opt/ml-traffic-gen/control.sh stop"
+    view_normal_logs = "tail -f /var/log/normal_traffic.log"
+    view_attack_logs = "tail -f /var/log/attack_patterns.log"
+    check_web_logs   = "tail -f /var/log/httpd/access_log"
   } : {}
 }
 
@@ -262,46 +262,46 @@ output "cost_summary" {
 output "quick_reference" {
   description = "Quick reference for current deployment"
   value = {
-    mode                = var.deployment_mode
-    web_url            = length(module.ml_data_generators) > 0 ? "http://${module.ml_data_generators[0].web_server_public_ip}/" : "Not available"
-    api_test           = length(module.ml_data_generators) > 0 ? "curl http://${module.ml_data_generators[0].web_server_public_ip}:8080/api/users" : "Not available"
-    ssh_web_server     = length(module.ml_data_generators) > 0 ? "ssh -i your-key.pem ec2-user@${module.ml_data_generators[0].web_server_public_ip}" : "Not available"
-    bastion_access     = var.deployment_mode == "full" && length(module.platform) > 0 ? "ssh -i your-key.pem ec2-user@${module.platform[0].bastion_public_ip}" : "Not available"
-    change_mode        = "Set deployment_mode variable to 'simplified', 'ml-focused', or 'full'"
+    mode           = var.deployment_mode
+    web_url        = length(module.ml_data_generators) > 0 ? "http://${module.ml_data_generators[0].web_server_public_ip}/" : "Not available"
+    api_test       = length(module.ml_data_generators) > 0 ? "curl http://${module.ml_data_generators[0].web_server_public_ip}:8080/api/users" : "Not available"
+    ssh_web_server = length(module.ml_data_generators) > 0 ? "ssh -i your-key.pem ec2-user@${module.ml_data_generators[0].web_server_public_ip}" : "Not available"
+    bastion_access = var.deployment_mode == "full" && length(module.platform) > 0 ? "ssh -i your-key.pem ec2-user@${module.platform[0].bastion_public_ip}" : "Not available"
+    change_mode    = "Set deployment_mode variable to 'simplified', 'ml-focused', or 'full'"
   }
 }
 
 output "deployment_summary" {
   description = "Complete deployment summary"
   value = {
-    deployment_mode     = var.deployment_mode
-    environment        = var.environment
-    vpc_cidr          = var.deployment_mode == "full" ? (
+    deployment_mode = var.deployment_mode
+    environment     = var.environment
+    vpc_cidr = var.deployment_mode == "full" ? (
       length(module.foundation) > 0 ? module.foundation[0].vpc_cidr_block : "Not deployed"
-    ) : (
+      ) : (
       length(module.ml_network) > 0 ? module.ml_network[0].vpc_cidr_block : "Not deployed"
     )
-    
+
     active_services = {
       ml_data_generation = length(module.ml_data_generators) > 0 ? "active" : "disabled"
-      web_server        = length(module.ml_data_generators) > 0 ? module.ml_data_generators[0].web_server_public_ip : "disabled"
-      traffic_generator = length(module.ml_data_generators) > 0 ? "active" : "disabled"
-      bastion_host      = var.deployment_mode == "full" && var.enable_bastion ? "active" : "disabled"
-      web_tier          = var.deployment_mode == "full" && var.enable_web_tier ? "active" : "disabled"
-      app_tier          = var.deployment_mode == "full" && var.enable_app_tier ? "active" : "disabled"
-      data_tier         = var.deployment_mode == "full" && var.enable_data_tier ? "active" : "disabled"
+      web_server         = length(module.ml_data_generators) > 0 ? module.ml_data_generators[0].web_server_public_ip : "disabled"
+      traffic_generator  = length(module.ml_data_generators) > 0 ? "active" : "disabled"
+      bastion_host       = var.deployment_mode == "full" && var.enable_bastion ? "active" : "disabled"
+      web_tier           = var.deployment_mode == "full" && var.enable_web_tier ? "active" : "disabled"
+      app_tier           = var.deployment_mode == "full" && var.enable_app_tier ? "active" : "disabled"
+      data_tier          = var.deployment_mode == "full" && var.enable_data_tier ? "active" : "disabled"
     }
-    
+
     data_collection = {
       vpc_flow_logs   = var.enable_flow_logs ? "enabled" : "disabled"
       cloudwatch_logs = var.enable_cloudwatch_logs ? "enabled" : "disabled"
       log_retention   = "${var.log_retention_days} days"
     }
-    
+
     cost_optimization = {
-      nat_solution     = var.enable_nat_instance ? "NAT Instance (cost-effective)" : "No NAT"
-      auto_shutdown    = var.auto_shutdown_enabled ? "enabled" : "disabled"
-      instance_sizes   = "Optimized for ${var.deployment_mode} mode"
+      nat_solution   = var.enable_nat_instance ? "NAT Instance (cost-effective)" : "No NAT"
+      auto_shutdown  = var.auto_shutdown_enabled ? "enabled" : "disabled"
+      instance_sizes = "Optimized for ${var.deployment_mode} mode"
     }
   }
 } 

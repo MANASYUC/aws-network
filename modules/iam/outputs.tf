@@ -74,12 +74,12 @@ output "lambda_execution_role_arn" {
 output "iam_summary" {
   description = "Summary of IAM resources created"
   value = {
-    environment          = var.environment
+    environment           = var.environment
     vpc_flow_logs_enabled = var.enable_flow_logs
-    admin_role_enabled   = var.enable_admin_role
-    bastion_role_enabled = var.enable_bastion_role
-    app_roles_enabled    = var.enable_app_roles
-    lambda_roles_enabled = var.enable_lambda_roles
+    admin_role_enabled    = var.enable_admin_role
+    bastion_role_enabled  = var.enable_bastion_role
+    app_roles_enabled     = var.enable_app_roles
+    lambda_roles_enabled  = var.enable_lambda_roles
   }
 }
 

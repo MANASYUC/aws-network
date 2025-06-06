@@ -30,19 +30,19 @@ output "vpc_info" {
 output "web_server_info" {
   description = "Web server access information"
   value = {
-    public_ip    = module.ml_data_generators.web_server_public_ip
-    private_ip   = module.ml_data_generators.web_server_private_ip
-    instance_id  = module.ml_data_generators.web_server_instance_id
-    ssh_command  = "ssh -i your-key.pem ec2-user@${module.ml_data_generators.web_server_public_ip}"
+    public_ip   = module.ml_data_generators.web_server_public_ip
+    private_ip  = module.ml_data_generators.web_server_private_ip
+    instance_id = module.ml_data_generators.web_server_instance_id
+    ssh_command = "ssh -i your-key.pem ec2-user@${module.ml_data_generators.web_server_public_ip}"
   }
 }
 
 output "traffic_generator_info" {
   description = "Traffic generator instance information"
   value = {
-    private_ip   = module.ml_data_generators.traffic_generator_private_ip
-    instance_id  = module.ml_data_generators.traffic_generator_instance_id
-    status       = "Running in private subnet, generating ML training data"
+    private_ip  = module.ml_data_generators.traffic_generator_private_ip
+    instance_id = module.ml_data_generators.traffic_generator_instance_id
+    status      = "Running in private subnet, generating ML training data"
   }
 }
 
@@ -63,7 +63,7 @@ output "s3_buckets" {
   description = "S3 buckets for ML data storage"
   value = {
     app_storage_bucket = module.ml_storage.app_storage_bucket
-    logs_bucket       = module.ml_storage.logs_bucket
+    logs_bucket        = module.ml_storage.logs_bucket
   }
 }
 
@@ -74,8 +74,8 @@ output "s3_buckets" {
 output "cloudwatch_logs" {
   description = "CloudWatch log groups"
   value = {
-    ml_logs          = module.ml_data_generators.cloudwatch_log_group
-    vpc_flow_logs    = module.ml_data_generators.vpc_flow_log_group
+    ml_logs       = module.ml_data_generators.cloudwatch_log_group
+    vpc_flow_logs = module.ml_data_generators.vpc_flow_log_group
   }
 }
 
@@ -86,7 +86,7 @@ output "cloudwatch_logs" {
 output "ssh_commands" {
   description = "SSH commands for quick access"
   value = {
-    web_server = "ssh -i your-key.pem ec2-user@${module.ml_data_generators.web_server_public_ip}"
+    web_server   = "ssh -i your-key.pem ec2-user@${module.ml_data_generators.web_server_public_ip}"
     nat_instance = "ssh -i your-key.pem ec2-user@${module.ml_network.nat_instance_public_ip}"
   }
   sensitive = false
@@ -94,7 +94,7 @@ output "ssh_commands" {
 
 output "web_server_url" {
   description = "Web server URL for testing"
-  value = "http://${module.ml_data_generators.web_server_public_ip}"
+  value       = "http://${module.ml_data_generators.web_server_public_ip}"
 }
 
 # ====================================
@@ -104,14 +104,14 @@ output "web_server_url" {
 output "deployment_summary" {
   description = "Summary of deployed resources"
   value = {
-    mode             = "simplified"
-    environment      = var.environment
-    region           = var.region
-    vpc_cidr         = module.ml_network.vpc_cidr
-    instances_count  = 3  # Web server + Traffic generator + NAT
-    estimated_cost   = "$0-15/month (Free Tier optimized)"
-    data_collection  = "Basic ML training data generation"
-    next_steps       = [
+    mode            = "simplified"
+    environment     = var.environment
+    region          = var.region
+    vpc_cidr        = module.ml_network.vpc_cidr
+    instances_count = 3 # Web server + Traffic generator + NAT
+    estimated_cost  = "$0-15/month (Free Tier optimized)"
+    data_collection = "Basic ML training data generation"
+    next_steps = [
       "SSH into web server to view logs",
       "Check S3 buckets for ML data",
       "Monitor CloudWatch logs",

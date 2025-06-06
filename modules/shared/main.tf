@@ -15,8 +15,8 @@ resource "aws_s3_bucket" "app_storage" {
   bucket = "${var.bucket_prefix}-app-storage-${var.environment}-${random_string.bucket_suffix.result}"
 
   tags = merge(var.common_tags, {
-    Name        = "${var.environment}-app-storage"
-    Purpose     = "Application Storage"
+    Name    = "${var.environment}-app-storage"
+    Purpose = "Application Storage"
   })
 }
 
@@ -64,17 +64,17 @@ resource "aws_s3_bucket_lifecycle_configuration" "app_storage" {
     }
 
     transition {
-      days          = 7   # Move to cheaper storage quickly
+      days          = 7 # Move to cheaper storage quickly
       storage_class = "STANDARD_IA"
     }
 
     transition {
-      days          = 14  # Move to cheapest storage
+      days          = 14 # Move to cheapest storage
       storage_class = "GLACIER"
     }
 
     expiration {
-      days = 30  # Delete after 30 days (vs 90)
+      days = 30 # Delete after 30 days (vs 90)
     }
   }
 
@@ -88,7 +88,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "app_storage" {
     }
 
     expiration {
-      days = 3  # Delete temp data after 3 days
+      days = 3 # Delete temp data after 3 days
     }
   }
 
@@ -98,7 +98,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "app_storage" {
     status = "Enabled"
 
     filter {
-      prefix = ""  # Apply to all objects
+      prefix = "" # Apply to all objects
     }
 
     abort_incomplete_multipart_upload {

@@ -12,7 +12,7 @@ variable "deployment_mode" {
   description = "Deployment mode: 'simplified' (minimal cost), 'ml-focused' (ML optimized), or 'full' (comprehensive learning)"
   type        = string
   default     = "simplified"
-  
+
   validation {
     condition     = contains(["simplified", "ml-focused", "full"], var.deployment_mode)
     error_message = "Deployment mode must be one of: simplified, ml-focused, full."
@@ -27,7 +27,7 @@ variable "environment" {
   description = "Environment name (dev, staging, prod)"
   type        = string
   default     = "ml-dev"
-  
+
   validation {
     condition     = contains(["dev", "staging", "prod", "ml-dev", "ml-prod"], var.environment)
     error_message = "Environment must be one of: dev, staging, prod, ml-dev, ml-prod."
@@ -82,7 +82,7 @@ variable "vpc_cidr" {
   description = "CIDR block for the VPC (used in full mode)"
   type        = string
   default     = "10.0.0.0/16"
-  
+
   validation {
     condition     = can(cidrhost(var.vpc_cidr, 0))
     error_message = "VPC CIDR must be a valid IPv4 CIDR block."
@@ -93,7 +93,7 @@ variable "az_count" {
   description = "Number of availability zones to use (full mode only)"
   type        = number
   default     = 2
-  
+
   validation {
     condition     = var.az_count >= 2 && var.az_count <= 4
     error_message = "AZ count must be between 2 and 4 for high availability."
@@ -126,7 +126,7 @@ variable "nat_instance_type" {
   description = "Instance type for NAT instance"
   type        = string
   default     = "t3.nano"
-  
+
   validation {
     condition     = contains(["t2.micro", "t2.small", "t3.nano", "t3.micro", "t3.small"], var.nat_instance_type)
     error_message = "NAT instance type should be small for cost efficiency."
@@ -355,7 +355,7 @@ variable "db_backup_retention" {
   description = "Database backup retention period in days"
   type        = number
   default     = 7
-  
+
   validation {
     condition     = var.db_backup_retention >= 1 && var.db_backup_retention <= 35
     error_message = "Backup retention must be between 1 and 35 days."
@@ -415,5 +415,5 @@ variable "enable_enhanced_monitoring" {
 variable "export_schedule" {
   description = "Cron expression for automated data export"
   type        = string
-  default     = "0 2 * * *"  # Daily at 2 AM
+  default     = "0 2 * * *" # Daily at 2 AM
 }

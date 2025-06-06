@@ -4,11 +4,11 @@
 # Private database servers
 
 resource "aws_instance" "db" {
-  ami                  = var.ami_id
-  instance_type        = var.instance_type
-  key_name            = var.key_name
-  subnet_id           = var.subnet_ids[0]  # Use first subnet for primary DB
-  security_groups     = [var.security_group_id]
+  ami             = var.ami_id
+  instance_type   = var.instance_type
+  key_name        = var.key_name
+  subnet_id       = var.subnet_ids[0] # Use first subnet for primary DB
+  security_groups = [var.security_group_id]
 
   user_data = base64encode(templatefile("${path.module}/user_data/db_server.sh", {
     environment = var.environment

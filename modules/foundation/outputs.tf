@@ -101,13 +101,13 @@ output "availability_zones" {
 output "network_summary" {
   description = "Summary of the network configuration"
   value = {
-    vpc_id                 = aws_vpc.main.id
-    vpc_cidr              = aws_vpc.main.cidr_block
-    environment           = var.environment
-    public_subnets        = length(aws_subnet.public)
-    private_subnets       = length(aws_subnet.private)
-    availability_zones    = length(var.availability_zones)
-    nat_instance_enabled  = var.enable_nat_instance
-    flow_logs_enabled     = var.enable_flow_logs
+    vpc_id               = aws_vpc.main.id
+    vpc_cidr             = aws_vpc.main.cidr_block
+    environment          = var.environment
+    public_subnets       = length(aws_subnet.public)
+    private_subnets      = length(aws_subnet.private)
+    availability_zones   = length(var.availability_zones)
+    nat_instance_enabled = var.enable_nat_instance
+    flow_logs_enabled    = var.enable_flow_logs
   }
 } 

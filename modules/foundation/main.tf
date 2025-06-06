@@ -125,13 +125,13 @@ resource "aws_eip" "nat" {
 # NAT Instance - Free tier friendly alternative to NAT Gateway
 resource "aws_instance" "nat" {
   count                       = var.enable_nat_instance ? 1 : 0
-  ami                        = var.nat_instance_ami_id
-  instance_type              = var.nat_instance_type
-  key_name                   = var.key_name
-  vpc_security_group_ids     = [aws_security_group.nat_instance[0].id]
-  subnet_id                  = aws_subnet.public[0].id
+  ami                         = var.nat_instance_ami_id
+  instance_type               = var.nat_instance_type
+  key_name                    = var.key_name
+  vpc_security_group_ids      = [aws_security_group.nat_instance[0].id]
+  subnet_id                   = aws_subnet.public[0].id
   associate_public_ip_address = true
-  source_dest_check          = false  # Critical for NAT functionality
+  source_dest_check           = false # Critical for NAT functionality
 
   user_data = <<-EOF
     #!/bin/bash
@@ -166,8 +166,8 @@ resource "aws_instance" "nat" {
 
 # Associate Elastic IP with NAT Instance
 resource "aws_eip_association" "nat" {
-  count       = var.enable_nat_instance ? 1 : 0
-  instance_id = aws_instance.nat[0].id
+  count         = var.enable_nat_instance ? 1 : 0
+  instance_id   = aws_instance.nat[0].id
   allocation_id = aws_eip.nat[0].id
 }
 

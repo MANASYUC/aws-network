@@ -11,8 +11,8 @@
 resource "aws_instance" "web_server" {
   ami                    = var.ami_id
   instance_type          = var.web_server_type
-  key_name              = var.key_name
-  subnet_id             = var.public_subnet_ids[0]
+  key_name               = var.key_name
+  subnet_id              = var.public_subnet_ids[0]
   vpc_security_group_ids = [aws_security_group.web_server.id]
 
   user_data = templatefile("${path.module}/scripts/web-server-setup.sh", {
@@ -33,8 +33,8 @@ resource "aws_instance" "web_server" {
 resource "aws_instance" "traffic_generator" {
   ami                    = var.ami_id
   instance_type          = var.traffic_gen_type
-  key_name              = var.key_name
-  subnet_id             = var.private_subnet_ids[0]
+  key_name               = var.key_name
+  subnet_id              = var.private_subnet_ids[0]
   vpc_security_group_ids = [aws_security_group.traffic_generator.id]
 
   user_data = templatefile("${path.module}/scripts/traffic-generator-setup.sh", {
@@ -90,7 +90,7 @@ resource "aws_security_group" "web_server" {
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]  # VPC only
+    cidr_blocks = ["10.0.0.0/16"] # VPC only
   }
 
   egress {
@@ -137,14 +137,14 @@ resource "aws_security_group" "traffic_generator" {
 # ====================================
 
 resource "aws_cloudwatch_log_group" "ml_logs" {
-  count             = var.enable_cloudwatch ? 1 : 0
-  name              = "/aws/ec2/${var.environment}-ml-data-generator"
-  
+  count = var.enable_cloudwatch ? 1 : 0
+  name  = "/aws/ec2/${var.environment}-ml-data-generator"
+
   # OPTIMIZATION 3: Minimal retention for application logs
-  retention_in_days = 1  # Export to S3 daily, keep minimal in CloudWatch
-  
+  retention_in_days = 1 # Export to S3 daily, keep minimal in CloudWatch
+
   tags = merge(var.tags, {
-    Name = "${var.environment}-ml-logs"
+    Name    = "${var.environment}-ml-logs"
     Purpose = "ML-Training-Events-Only"
   })
 }
@@ -154,9 +154,9 @@ resource "aws_cloudwatch_log_group" "ml_training_events" {
   count             = var.enable_cloudwatch ? 1 : 0
   name              = "/aws/ml/${var.environment}-training-events"
   retention_in_days = 1
-  
+
   tags = merge(var.tags, {
-    Name = "${var.environment}-ml-training-events"
+    Name    = "${var.environment}-ml-training-events"
     Purpose = "Filtered-ML-Events"
   })
 }
@@ -169,29 +169,29 @@ resource "aws_flow_log" "ml_vpc_flow" {
   count           = var.enable_flow_logs ? 1 : 0
   iam_role_arn    = aws_iam_role.flow_logs[0].arn
   log_destination = aws_cloudwatch_log_group.flow_logs[0].arn
-  
+
   # COMPREHENSIVE TRAFFIC: Capture both normal and abnormal patterns
   # Essential for anomaly detection - need baseline + anomalies
-  traffic_type    = "ALL"  # Changed back to ALL for comprehensive ML training
-  
-  vpc_id          = var.vpc_id
+  traffic_type = "ALL" # Changed back to ALL for comprehensive ML training
+
+  vpc_id = var.vpc_id
 
   tags = merge(var.tags, {
-    Name = "${var.environment}-ml-vpc-flow-logs"
-    Purpose = "Comprehensive-Anomaly-Detection"
+    Name     = "${var.environment}-ml-vpc-flow-logs"
+    Purpose  = "Comprehensive-Anomaly-Detection"
     DataType = "Normal-and-Anomalous-Patterns"
   })
 }
 
 resource "aws_cloudwatch_log_group" "flow_logs" {
-  count             = var.enable_flow_logs ? 1 : 0
-  name              = "/aws/vpc/${var.environment}-flow-logs"
-  
+  count = var.enable_flow_logs ? 1 : 0
+  name  = "/aws/vpc/${var.environment}-flow-logs"
+
   # OPTIMIZATION 2: Minimal retention for free tier
-  retention_in_days = 1  # Keep only 1 day in CloudWatch
-  
+  retention_in_days = 1 # Keep only 1 day in CloudWatch
+
   tags = merge(var.tags, {
-    Name = "${var.environment}-ml-flow-logs"
+    Name         = "${var.environment}-ml-flow-logs"
     OptimizedFor = "FreeTier"
   })
 }

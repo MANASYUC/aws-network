@@ -31,8 +31,8 @@ resource "aws_iam_role" "vpc_flow_logs" {
   })
 
   tags = merge(var.common_tags, {
-    Name = "${var.environment}-vpc-flow-logs-role"
-    Type = "IAM"
+    Name    = "${var.environment}-vpc-flow-logs-role"
+    Type    = "IAM"
     Purpose = "VPC Flow Logs"
   })
 }
@@ -82,8 +82,8 @@ resource "aws_iam_role" "admin" {
   })
 
   tags = merge(var.common_tags, {
-    Name = "${var.environment}-admin-role"
-    Type = "IAM"
+    Name    = "${var.environment}-admin-role"
+    Type    = "IAM"
     Purpose = "Admin Access"
   })
 }
@@ -156,8 +156,8 @@ resource "aws_iam_role" "bastion" {
   })
 
   tags = merge(var.common_tags, {
-    Name = "${var.environment}-bastion-role"
-    Type = "IAM"
+    Name    = "${var.environment}-bastion-role"
+    Type    = "IAM"
     Purpose = "Bastion Host"
   })
 }
@@ -211,8 +211,8 @@ resource "aws_iam_role" "app_tier" {
   })
 
   tags = merge(var.common_tags, {
-    Name = "${var.environment}-app-tier-role"
-    Type = "IAM"
+    Name    = "${var.environment}-app-tier-role"
+    Type    = "IAM"
     Purpose = "Application Tier"
   })
 }
@@ -274,8 +274,8 @@ resource "aws_iam_role" "lambda_execution" {
   })
 
   tags = merge(var.common_tags, {
-    Name = "${var.environment}-lambda-execution-role"
-    Type = "IAM"
+    Name    = "${var.environment}-lambda-execution-role"
+    Type    = "IAM"
     Purpose = "Lambda Execution"
   })
 }

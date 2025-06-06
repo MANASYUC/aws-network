@@ -12,7 +12,7 @@ variable "environment" {
   description = "Environment name (dev, staging, prod)"
   type        = string
   default     = "dev"
-  
+
   validation {
     condition     = contains(["dev", "staging", "prod"], var.environment)
     error_message = "Environment must be one of: dev, staging, prod."
@@ -42,8 +42,8 @@ variable "common_tags" {
 variable "admin_cidr_blocks" {
   description = "CIDR blocks allowed for administrative access"
   type        = list(string)
-  default     = ["0.0.0.0/0"]  # WARNING: Change this to your specific IP range
-  
+  default     = ["0.0.0.0/0"] # WARNING: Change this to your specific IP range
+
   validation {
     condition = length(var.admin_cidr_blocks) > 0 && alltrue([
       for cidr in var.admin_cidr_blocks : can(cidrhost(cidr, 0))
@@ -56,7 +56,7 @@ variable "existing_key_name" {
   description = "Name of existing EC2 key pair for SSH access"
   type        = string
   default     = ""
-  
+
   validation {
     condition     = length(var.existing_key_name) > 0
     error_message = "Key name cannot be empty - you must provide an existing EC2 key pair name."
@@ -71,7 +71,7 @@ variable "vpc_cidr" {
   description = "CIDR block for the VPC"
   type        = string
   default     = "10.0.0.0/16"
-  
+
   validation {
     condition     = can(cidrhost(var.vpc_cidr, 0))
     error_message = "VPC CIDR must be a valid IPv4 CIDR block."
@@ -82,7 +82,7 @@ variable "az_count" {
   description = "Number of availability zones to use"
   type        = number
   default     = 2
-  
+
   validation {
     condition     = var.az_count >= 2 && var.az_count <= 4
     error_message = "AZ count must be between 2 and 4 for high availability."
@@ -115,7 +115,7 @@ variable "nat_instance_type" {
   description = "Instance type for NAT instance"
   type        = string
   default     = "t2.micro"
-  
+
   validation {
     condition     = contains(["t2.micro", "t2.small", "t3.nano", "t3.micro", "t3.small"], var.nat_instance_type)
     error_message = "NAT instance type should be small for cost efficiency."
@@ -148,7 +148,7 @@ variable "log_retention_days" {
   description = "Number of days to retain logs"
   type        = number
   default     = 30
-  
+
   validation {
     condition     = var.log_retention_days >= 1 && var.log_retention_days <= 365
     error_message = "Log retention must be between 1 and 365 days."
@@ -270,7 +270,7 @@ variable "db_backup_retention" {
   description = "Database backup retention period in days"
   type        = number
   default     = 7
-  
+
   validation {
     condition     = var.db_backup_retention >= 1 && var.db_backup_retention <= 35
     error_message = "Backup retention must be between 1 and 35 days."
