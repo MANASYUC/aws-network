@@ -1,7 +1,7 @@
 # ====================================
 # PLATFORM MODULE - SECURITY & MANAGEMENT
 # ====================================
-# This module creates platform services that run on top of the foundation:
+# This module creates platform services that run on top of the core:
 # - Security Groups for different tiers
 # - Bastion Host for secure access
 # - Network ACLs for additional security
@@ -205,9 +205,9 @@ resource "aws_instance" "bastion" {
   count                       = var.enable_bastion ? 1 : 0
   ami                         = var.bastion_ami_id
   instance_type               = var.bastion_instance_type
-  key_name                    = var.existing_key_name != "" ? var.existing_key_name : aws_key_pair.bastion[0].key_name
+  key_name                    = var.existing_key_name != "" ? var.existing_key_name : aws_key_pair.bastion.key_name
   subnet_id                   = var.public_subnet_ids[0]
-  vpc_security_group_ids      = [aws_security_group.bastion[0].id]
+  vpc_security_group_ids      = [aws_security_group.bastion.id]
   associate_public_ip_address = true
 
   user_data = base64encode(templatefile("${path.module}/user_data/bastion_setup.sh", {
@@ -303,5 +303,5 @@ resource "aws_network_acl" "platform" {
 resource "aws_network_acl_association" "public" {
   count          = var.enable_network_acls ? length(var.public_subnet_ids) : 0
   subnet_id      = var.public_subnet_ids[count.index]
-  network_acl_id = aws_network_acl.platform[0].id
+  network_acl_id = aws_network_acl.platform.id
 } 

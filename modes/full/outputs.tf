@@ -40,7 +40,7 @@ output "deployed_modules" {
 output "vpc_id" {
   description = "ID of the VPC"
   value = var.deployment_mode == "full" ? (
-    length(module.foundation) > 0 ? module.foundation[0].vpc_id : null
+    length(module.core) > 0 ? module.core[0].vpc_id : null
     ) : (
     length(module.ml_network) > 0 ? module.ml_network[0].vpc_id : null
   )
@@ -49,7 +49,7 @@ output "vpc_id" {
 output "vpc_cidr" {
   description = "CIDR block of the VPC"
   value = var.deployment_mode == "full" ? (
-    length(module.foundation) > 0 ? module.foundation[0].vpc_cidr_block : null
+    length(module.core) > 0 ? module.core[0].vpc_cidr_block : null
     ) : (
     length(module.ml_network) > 0 ? module.ml_network[0].vpc_cidr_block : null
   )
@@ -58,7 +58,7 @@ output "vpc_cidr" {
 output "public_subnet_ids" {
   description = "IDs of the public subnets"
   value = var.deployment_mode == "full" ? (
-    length(module.foundation) > 0 ? module.foundation[0].public_subnet_ids : []
+    length(module.core) > 0 ? module.core[0].public_subnet_ids : []
     ) : (
     length(module.ml_network) > 0 ? module.ml_network[0].public_subnet_ids : []
   )
@@ -67,7 +67,7 @@ output "public_subnet_ids" {
 output "private_subnet_ids" {
   description = "IDs of the private subnets"
   value = var.deployment_mode == "full" ? (
-    length(module.foundation) > 0 ? module.foundation[0].private_subnet_ids : []
+    length(module.core) > 0 ? module.core[0].private_subnet_ids : []
     ) : (
     length(module.ml_network) > 0 ? module.ml_network[0].private_subnet_ids : []
   )
@@ -125,17 +125,17 @@ output "nat_instance_info" {
   description = "NAT Instance information"
   value = var.enable_nat_instance ? {
     instance_id = var.deployment_mode == "full" ? (
-      length(module.foundation) > 0 ? module.foundation[0].nat_instance_id : null
+      length(module.core) > 0 ? module.core[0].nat_instance_id : null
       ) : (
       length(module.ml_network) > 0 ? module.ml_network[0].nat_instance_id : null
     )
     private_ip = var.deployment_mode == "full" ? (
-      length(module.foundation) > 0 ? module.foundation[0].nat_instance_private_ip : null
+      length(module.core) > 0 ? module.core[0].nat_instance_private_ip : null
       ) : (
       length(module.ml_network) > 0 ? module.ml_network[0].nat_instance_private_ip : null
     )
     public_ip = var.deployment_mode == "full" ? (
-      length(module.foundation) > 0 ? module.foundation[0].nat_public_ip : null
+      length(module.core) > 0 ? module.core[0].nat_public_ip : null
       ) : (
       length(module.ml_network) > 0 ? module.ml_network[0].nat_public_ip : null
     )
@@ -174,7 +174,7 @@ output "data_tier_instances" {
 output "flow_logs_group" {
   description = "CloudWatch log group for VPC flow logs"
   value = var.deployment_mode == "full" ? (
-    var.enable_flow_logs && length(module.foundation) > 0 ? module.foundation[0].flow_logs_group_name : null
+    var.enable_flow_logs && length(module.core) > 0 ? module.core[0].flow_logs_group_name : null
     ) : (
     length(module.ml_data_generators) > 0 ? module.ml_data_generators[0].flow_logs_group_name : null
   )
@@ -277,7 +277,7 @@ output "deployment_summary" {
     deployment_mode = var.deployment_mode
     environment     = var.environment
     vpc_cidr = var.deployment_mode == "full" ? (
-      length(module.foundation) > 0 ? module.foundation[0].vpc_cidr_block : "Not deployed"
+      length(module.core) > 0 ? module.core[0].vpc_cidr_block : "Not deployed"
       ) : (
       length(module.ml_network) > 0 ? module.ml_network[0].vpc_cidr_block : "Not deployed"
     )

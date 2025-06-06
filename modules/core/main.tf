@@ -1,5 +1,5 @@
 # ====================================
-# FOUNDATION MODULE - CORE NETWORKING
+# CORE MODULE - CORE NETWORKING
 # ====================================
 # This module creates the fundamental network infrastructure:
 # - VPC with DNS support

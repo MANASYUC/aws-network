@@ -3,6 +3,7 @@
 # ====================================
 # This demonstrates the new layered architecture:
 # Layer 1: Foundation (Network Infrastructure)
+# Layer 1: Core (Network Infrastructure)
 # Layer 2: Platform (Security & Management)  
 # Layer 3: Applications (Workloads)
 # ====================================
@@ -65,18 +66,17 @@ module "iam" {
   enable_admin_role   = var.enable_bastion || var.enable_web_tier || var.enable_app_tier || var.enable_data_tier
   enable_bastion_role = var.enable_bastion
   enable_app_roles    = var.enable_app_tier
-  enable_lambda_roles = false # Set to true when Lambda functions are added
 
   # Tags
   common_tags = local.common_tags
 }
 
 # ====================================
-# LAYER 1: FOUNDATION (NETWORK INFRASTRUCTURE)
+# LAYER 1: CORE (NETWORK INFRASTRUCTURE)
 # ====================================
 
-module "foundation" {
-  source = "./modules/foundation"
+module "core" {
+  source = "./modules/core"
 
   # Environment
   environment = local.environment
@@ -89,16 +89,12 @@ module "foundation" {
 
   # Feature toggles
   enable_nat_instance = var.enable_nat_instance
-  enable_flow_logs    = var.enable_flow_logs
 
   # NAT Instance Configuration
   nat_instance_ami_id = data.aws_ami.amazon_linux.id
   nat_instance_type   = var.nat_instance_type
   key_name            = var.existing_key_name
   admin_cidr_blocks   = var.admin_cidr_blocks
-
-  # IAM Dependencies
-  flow_logs_role_arn = module.iam.vpc_flow_logs_role_arn
 
   # Tags
   common_tags = local.common_tags
@@ -114,10 +110,10 @@ module "foundation" {
 module "platform" {
   source = "./modules/platform"
 
-  # Dependencies from foundation layer
-  vpc_id             = module.foundation.vpc_id
-  public_subnet_ids  = module.foundation.public_subnet_ids
-  private_subnet_ids = module.foundation.private_subnet_ids
+  # Dependencies from core layer
+  vpc_id             = module.core.vpc_id
+  public_subnet_ids  = module.core.public_subnet_ids
+  private_subnet_ids = module.core.private_subnet_ids
 
   # Environment
   environment = local.environment
@@ -147,7 +143,7 @@ module "platform" {
   common_tags = local.common_tags
 
   # Explicit dependency
-  depends_on = [module.foundation]
+  depends_on = [module.core]
 }
 
 # ====================================
@@ -155,13 +151,13 @@ module "platform" {
 # ====================================
 
 # Web Tier - Public facing web servers
-module "web_tier" {
-  source = "./modules/applications/web-tier"
+module "web" {
+  source = "./modules/applications/web"
   count  = var.enable_web_tier ? 1 : 0
 
   # Dependencies
-  vpc_id            = module.foundation.vpc_id
-  subnet_ids        = module.foundation.public_subnet_ids
+  vpc_id            = module.core.vpc_id
+  subnet_ids        = module.core.public_subnet_ids
   security_group_id = module.platform.web_tier_security_group_id
 
   # Configuration
@@ -178,13 +174,13 @@ module "web_tier" {
 }
 
 # App Tier - Application servers in private subnets
-module "app_tier" {
-  source = "./modules/applications/app-tier"
+module "app" {
+  source = "./modules/applications/app"
   count  = var.enable_app_tier ? 1 : 0
 
   # Dependencies  
-  vpc_id            = module.foundation.vpc_id
-  subnet_ids        = module.foundation.private_subnet_ids
+  vpc_id            = module.core.vpc_id
+  subnet_ids        = module.core.private_subnet_ids
   security_group_id = module.platform.app_tier_security_group_id
 
   # Configuration
@@ -202,13 +198,13 @@ module "app_tier" {
 }
 
 # Data Tier - Database servers
-module "data_tier" {
-  source = "./modules/applications/data-tier"
+module "db" {
+  source = "./modules/applications/db"
   count  = var.enable_data_tier ? 1 : 0
 
   # Dependencies
-  vpc_id            = module.foundation.vpc_id
-  subnet_ids        = module.foundation.private_subnet_ids
+  vpc_id            = module.core.vpc_id
+  subnet_ids        = module.core.private_subnet_ids
   security_group_id = module.platform.db_tier_security_group_id
 
   # Configuration

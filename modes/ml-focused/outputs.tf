@@ -9,14 +9,14 @@
 output "vpc_info" {
   description = "VPC configuration details"
   value = {
-    vpc_id   = module.foundation.vpc_id
+    vpc_id   = module.core.vpc_id
     vpc_cidr = "10.0.0.0/16"
     public_subnets = {
-      ids   = module.foundation.public_subnet_ids
+      ids   = module.core.public_subnet_ids
       cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
     }
     private_subnets = {
-      ids   = module.foundation.private_subnet_ids
+      ids   = module.core.private_subnet_ids
       cidrs = ["10.0.10.0/24", "10.0.20.0/24"]
     }
   }
@@ -38,7 +38,7 @@ output "ml_infrastructure" {
       id         = module.ml_data_generators.traffic_generator_id
       private_ip = module.ml_data_generators.traffic_generator_private_ip
     }
-    nat_instance = module.foundation.nat_instance_info
+    nat_instance = module.core.nat_instance_info
     bastion_host = var.enable_bastion ? {
       id         = module.bastion_host[0].bastion_instance_id
       public_ip  = module.bastion_host[0].bastion_public_ip
@@ -85,7 +85,7 @@ output "ssh_commands" {
   description = "SSH access commands for instances"
   value = {
     web_server   = "ssh -i your-key.pem ec2-user@${module.ml_data_generators.web_server_public_ip}"
-    nat_instance = "ssh -i your-key.pem ec2-user@${module.foundation.nat_instance_info.public_ip}"
+    nat_instance = "ssh -i your-key.pem ec2-user@${module.core.nat_instance_info.public_ip}"
     bastion_host = var.enable_bastion ? "ssh -i your-key.pem ec2-user@${module.bastion_host[0].bastion_public_ip}" : "Bastion not enabled"
   }
 }

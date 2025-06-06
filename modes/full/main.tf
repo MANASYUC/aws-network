@@ -73,10 +73,38 @@ module "iam" {
 
 # ====================================
 # FOUNDATION LAYER
+# CORE LAYER
 # ====================================
 
 module "foundation" {
-  source = "../../modules/foundation"
+  source = "../../modules/core"
+
+  # Environment
+  environment = var.environment
+
+  # Network Configuration
+  vpc_cidr             = local.vpc_cidr
+  availability_zones   = local.availability_zones
+  public_subnet_cidrs  = var.public_subnet_cidrs
+  private_subnet_cidrs = var.private_subnet_cidrs
+
+  # Features
+  enable_nat_instance = var.enable_nat_instance
+
+  # NAT Configuration
+  nat_instance_ami_id = data.aws_ami.amazon_linux.id
+  nat_instance_type   = var.nat_instance_type
+  key_name            = var.existing_key_name
+  admin_cidr_blocks   = var.admin_cidr_blocks
+
+  # Tags
+  common_tags = local.common_tags
+
+  depends_on = [module.iam]
+}
+
+module "core" {
+  source = "../../modules/core"
 
   # Environment
   environment = var.environment
@@ -110,9 +138,9 @@ module "platform" {
   source = "../../modules/platform"
 
   # Dependencies
-  vpc_id             = module.foundation.vpc_id
-  public_subnet_ids  = module.foundation.public_subnet_ids
-  private_subnet_ids = module.foundation.private_subnet_ids
+  vpc_id             = module.core.vpc_id
+  public_subnet_ids  = module.core.public_subnet_ids
+  private_subnet_ids = module.core.private_subnet_ids
 
   # Environment
   environment = var.environment
@@ -141,7 +169,7 @@ module "platform" {
   # Tags
   common_tags = local.common_tags
 
-  depends_on = [module.foundation]
+  depends_on = [module.core]
 }
 
 # ====================================
@@ -151,11 +179,11 @@ module "platform" {
 # Web Tier - Public facing web servers
 module "web_tier" {
   count  = var.enable_web_tier ? 1 : 0
-  source = "../../modules/applications/web-tier"
+  source = "../../modules/applications/web"
 
   # Dependencies
-  vpc_id            = module.foundation.vpc_id
-  subnet_ids        = module.foundation.public_subnet_ids
+  vpc_id            = module.core.vpc_id
+  subnet_ids        = module.core.public_subnet_ids
   security_group_id = module.platform.web_tier_security_group_id
 
   # Configuration
@@ -174,11 +202,11 @@ module "web_tier" {
 # App Tier - Application servers in private subnets
 module "app_tier" {
   count  = var.enable_app_tier ? 1 : 0
-  source = "../../modules/applications/app-tier"
+  source = "../../modules/applications/app"
 
   # Dependencies  
-  vpc_id            = module.foundation.vpc_id
-  subnet_ids        = module.foundation.private_subnet_ids
+  vpc_id            = module.core.vpc_id
+  subnet_ids        = module.core.private_subnet_ids
   security_group_id = module.platform.app_tier_security_group_id
 
   # Configuration
@@ -198,11 +226,11 @@ module "app_tier" {
 # Data Tier - Database servers in private subnets
 module "data_tier" {
   count  = var.enable_data_tier ? 1 : 0
-  source = "../../modules/applications/data-tier"
+  source = "../../modules/applications/db"
 
   # Dependencies
-  vpc_id            = module.foundation.vpc_id
-  subnet_ids        = module.foundation.private_subnet_ids
+  vpc_id            = module.core.vpc_id
+  subnet_ids        = module.core.private_subnet_ids
   security_group_id = module.platform.db_tier_security_group_id
 
   # Configuration

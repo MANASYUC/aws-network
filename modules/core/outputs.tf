@@ -1,5 +1,5 @@
 # ====================================
-# FOUNDATION MODULE - OUTPUTS
+# CORE MODULE - OUTPUTS
 # ====================================
 # These outputs expose the created network resources
 # so they can be consumed by other modules

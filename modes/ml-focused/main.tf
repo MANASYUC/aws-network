@@ -47,10 +47,34 @@ locals {
 
 # ====================================
 # FOUNDATION NETWORK INFRASTRUCTURE
+# CORE NETWORK INFRASTRUCTURE
 # ====================================
 
 module "foundation" {
-  source = "../../modules/foundation"
+  source = "../../modules/core"
+
+  # Basic configuration
+  environment          = var.environment
+  vpc_cidr             = local.vpc_cidr
+  availability_zones   = local.availability_zones
+  public_subnet_cidrs  = local.public_subnet_cidrs
+  private_subnet_cidrs = local.private_subnet_cidrs
+
+  # Enhanced features for ML data collection
+  enable_nat_instance = true
+  nat_instance_ami_id = data.aws_ami.amazon_linux.id
+  nat_instance_type   = var.nat_instance_type
+  key_name            = var.existing_key_name
+  admin_cidr_blocks   = var.admin_cidr_blocks
+
+  # Tags
+  common_tags = local.common_tags
+
+  depends_on = [module.iam]
+}
+
+module "core" {
+  source = "../../modules/core"
 
   # Basic configuration
   environment          = var.environment
@@ -99,9 +123,9 @@ module "ml_data_generators" {
   source = "../../modules/ml-generators"
 
   # Network dependencies
-  vpc_id             = module.foundation.vpc_id
-  public_subnet_ids  = module.foundation.public_subnet_ids
-  private_subnet_ids = module.foundation.private_subnet_ids
+  vpc_id             = module.core.vpc_id
+  public_subnet_ids  = module.core.public_subnet_ids
+  private_subnet_ids = module.core.private_subnet_ids
 
   # Basic configuration
   environment       = var.environment
@@ -116,7 +140,7 @@ module "ml_data_generators" {
   # Tags
   tags = local.common_tags
 
-  depends_on = [module.foundation]
+  depends_on = [module.core]
 }
 
 # ====================================
@@ -147,9 +171,9 @@ module "bastion_host" {
   source = "../../modules/platform"
 
   # Dependencies
-  vpc_id             = module.foundation.vpc_id
-  public_subnet_ids  = module.foundation.public_subnet_ids
-  private_subnet_ids = module.foundation.private_subnet_ids
+  vpc_id             = module.core.vpc_id
+  public_subnet_ids  = module.core.public_subnet_ids
+  private_subnet_ids = module.core.private_subnet_ids
 
   # Environment
   environment = var.environment
@@ -177,5 +201,5 @@ module "bastion_host" {
   # Tags
   common_tags = local.common_tags
 
-  depends_on = [module.foundation]
+  depends_on = [module.core]
 } 

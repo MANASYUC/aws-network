@@ -7,7 +7,7 @@ variable "environment" {
   type        = string
 }
 
-# Network inputs from foundation layer
+# Network inputs from core layer
 variable "vpc_id" {
   description = "ID of the VPC where platform resources will be created"
   type        = string
