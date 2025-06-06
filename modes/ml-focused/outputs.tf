@@ -1,155 +1,161 @@
 # ====================================
-# ML-FOCUSED MODE OUTPUTS
+# ML-FOCUSED INFRASTRUCTURE OUTPUTS
 # ====================================
-# Enhanced outputs for comprehensive ML training data
 
 # ====================================
 # NETWORK INFORMATION
 # ====================================
 
 output "vpc_info" {
-  description = "VPC configuration details"
+  description = "VPC and networking information"
   value = {
-    vpc_id   = module.ml_network.vpc_id
-    vpc_cidr = module.ml_network.vpc_cidr
-    public_subnets = {
-      ids   = module.ml_network.public_subnet_ids
-      cidrs = module.ml_network.public_subnet_cidrs
-    }
-    private_subnets = {
-      ids   = module.ml_network.private_subnet_ids
-      cidrs = module.ml_network.private_subnet_cidrs
+    vpc_id   = module.foundation.vpc_id
+    vpc_cidr = module.foundation.vpc_cidr_block
+    subnets = {
+      public = {
+        ids   = module.foundation.public_subnet_ids
+        cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+      }
+      private = {
+        ids   = module.foundation.private_subnet_ids
+        cidrs = ["10.0.10.0/24", "10.0.20.0/24"]
+      }
     }
   }
 }
 
 # ====================================
-# INSTANCE ACCESS
+# ML DATA GENERATION OUTPUTS
 # ====================================
 
-output "web_server_info" {
-  description = "Web server access information"
+output "ml_data_generators" {
+  description = "ML data generation infrastructure"
   value = {
-    public_ip   = module.ml_data_generators.web_server_public_ip
-    private_ip  = module.ml_data_generators.web_server_private_ip
-    instance_id = module.ml_data_generators.web_server_instance_id
-    ssh_command = "ssh -i your-key.pem ec2-user@${module.ml_data_generators.web_server_public_ip}"
+    web_server = {
+      public_ip  = module.ml_data_generators.web_server_public_ip
+      private_ip = module.ml_data_generators.web_server_private_ip
+      url        = "http://${module.ml_data_generators.web_server_public_ip}/"
+      api_url    = "http://${module.ml_data_generators.web_server_public_ip}:8080/api/users"
+    }
+    traffic_generator = {
+      private_ip = module.ml_data_generators.traffic_generator_private_ip
+    }
   }
 }
 
-output "traffic_generator_info" {
-  description = "Traffic generator instance information"
-  value = {
-    private_ip  = module.ml_data_generators.traffic_generator_private_ip
-    instance_id = module.ml_data_generators.traffic_generator_instance_id
-    status      = "Generating comprehensive ML training data"
-    data_types  = "Network, Authentication, System, Application, Time-series"
-  }
-}
+# ====================================
+# NAT INSTANCE INFO
+# ====================================
 
 output "nat_instance_info" {
-  description = "NAT instance information"
+  description = "NAT instance information for cost-effective private subnet access"
   value = {
-    public_ip   = module.ml_network.nat_instance_public_ip
-    private_ip  = module.ml_network.nat_instance_private_ip
-    instance_id = module.ml_network.nat_instance_id
+    public_ip   = module.foundation.nat_public_ip
+    private_ip  = module.foundation.nat_instance_private_ip
+    instance_id = module.foundation.nat_instance_id
   }
 }
 
+# ====================================
+# BASTION HOST (If Enabled)
+# ====================================
+
 output "bastion_host_info" {
-  description = "Bastion host information (if enabled)"
+  description = "Bastion host information"
   value = var.enable_bastion && length(module.bastion_host) > 0 ? {
     public_ip   = module.bastion_host[0].bastion_public_ip
     instance_id = module.bastion_host[0].bastion_instance_id
     ssh_command = "ssh -i your-key.pem ec2-user@${module.bastion_host[0].bastion_public_ip}"
-  } : "Bastion host not enabled"
+  } : null
 }
 
 # ====================================
-# ML DATA STORAGE
+# S3 STORAGE FOR ML DATASETS
 # ====================================
 
 output "s3_buckets" {
-  description = "S3 buckets for ML data storage"
+  description = "S3 buckets for ML dataset storage"
   value = {
-    app_storage_bucket = module.ml_storage.app_storage_bucket
-    logs_bucket        = module.ml_storage.logs_bucket
-    ml_dataset_path    = "s3://${module.ml_storage.app_storage_bucket}/ml-datasets/anomaly-detection/"
+    app_storage_bucket = module.ml_storage.app_storage_bucket_id
+    logs_bucket        = module.ml_storage.logs_bucket_id
+    ml_dataset_path    = "s3://${module.ml_storage.app_storage_bucket_id}/ml-datasets/anomaly-detection/"
   }
 }
+
+# ====================================
+# ML DATASET INFORMATION
+# ====================================
 
 output "ml_dataset_info" {
-  description = "ML dataset collection information"
+  description = "Information about ML datasets and collection"
   value = {
-    bucket_name     = module.ml_storage.app_storage_bucket
-    dataset_types   = ["network-patterns", "authentication-events", "system-behavior", "application-metrics", "time-series"]
-    export_schedule = var.export_schedule
-    retention_days  = var.s3_retention_days
-    access_command  = "aws s3 ls s3://${module.ml_storage.app_storage_bucket}/ml-datasets/"
+    bucket_name     = module.ml_storage.app_storage_bucket_id
+    data_types      = "Network,Authentication,System,Application,TimeSeries"
+    collection_mode = "Enhanced-Anomaly-Detection"
+    access_command  = "aws s3 ls s3://${module.ml_storage.app_storage_bucket_id}/ml-datasets/"
   }
 }
 
 # ====================================
-# MONITORING AND LOGGING
+# MONITORING & COMMANDS
 # ====================================
-
-output "cloudwatch_logs" {
-  description = "CloudWatch log groups"
-  value = {
-    ml_logs        = module.ml_data_generators.cloudwatch_log_group
-    vpc_flow_logs  = module.ml_data_generators.vpc_flow_log_group
-    retention_days = var.log_retention_days
-  }
-}
 
 output "monitoring_commands" {
-  description = "Commands to monitor ML data collection"
+  description = "Useful commands for monitoring and data collection"
   value = {
-    view_flow_logs    = "aws logs filter-log-events --log-group-name '/aws/vpc/ml-dev-flow-logs'"
-    view_ml_logs      = "aws logs filter-log-events --log-group-name '/aws/ec2/ml-dev-ml-data-generator'"
-    download_datasets = "aws s3 sync s3://${module.ml_storage.app_storage_bucket}/ml-datasets/ ./ml-data/"
-    check_s3_usage    = "aws s3 ls s3://${module.ml_storage.app_storage_bucket} --recursive --human-readable --summarize"
+    ssh_web_server    = "ssh -i your-key.pem ec2-user@${module.ml_data_generators.web_server_public_ip}"
+    view_flow_logs    = var.enable_flow_logs ? "aws logs get-log-events --log-group-name ${module.ml_data_generators.flow_logs_group_name}" : "Flow logs not enabled"
+    view_ml_logs      = var.enable_cloudwatch_logs ? "aws logs get-log-events --log-group-name ${module.ml_data_generators.ml_logs_group_name}" : "CloudWatch logs not enabled"
+    test_web_app      = "curl http://${module.ml_data_generators.web_server_public_ip}/"
+    test_api          = "curl http://${module.ml_data_generators.web_server_public_ip}:8080/api/users"
+    download_datasets = "aws s3 sync s3://${module.ml_storage.app_storage_bucket_id}/ml-datasets/ ./ml-data/"
+    check_s3_usage    = "aws s3 ls s3://${module.ml_storage.app_storage_bucket_id} --recursive --human-readable --summarize"
   }
 }
 
 # ====================================
-# QUICK ACCESS COMMANDS
+# SECURITY INFORMATION
 # ====================================
 
-output "ssh_commands" {
-  description = "SSH commands for quick access"
+output "security_groups" {
+  description = "Security group information"
   value = {
-    web_server   = "ssh -i your-key.pem ec2-user@${module.ml_data_generators.web_server_public_ip}"
-    nat_instance = "ssh -i your-key.pem ec2-user@${module.ml_network.nat_instance_public_ip}"
-    bastion_host = var.enable_bastion && length(module.bastion_host) > 0 ? "ssh -i your-key.pem ec2-user@${module.bastion_host[0].bastion_public_ip}" : "Bastion not enabled"
+    web_server_sg        = module.ml_data_generators.web_server_security_group_id
+    traffic_generator_sg = module.ml_data_generators.traffic_generator_security_group_id
   }
-  sensitive = false
-}
-
-output "web_server_url" {
-  description = "Web server URL for testing"
-  value       = "http://${module.ml_data_generators.web_server_public_ip}"
 }
 
 # ====================================
-# ML TRAINING READY OUTPUTS
+# COST SUMMARY
 # ====================================
 
-output "ml_training_info" {
-  description = "Information for ML model training"
+output "cost_summary" {
+  description = "Estimated monthly costs for ML-focused deployment"
   value = {
-    data_ready       = "Comprehensive anomaly detection dataset"
-    normal_patterns  = "80% baseline behavior (sampled)"
-    anomaly_patterns = "20% attack/unusual patterns (complete)"
-    feature_vectors  = "JSON format with multi-dimensional features"
-    data_layers      = ["Network", "Authentication", "System", "Application", "Time-series"]
-    ml_algorithms    = ["Isolation Forest", "One-Class SVM", "Autoencoders", "LSTM", "Random Forest"]
-    next_steps = [
-      "Download datasets from S3",
-      "Analyze data patterns",
-      "Build anomaly detection models",
-      "Train on normal vs anomalous patterns"
-    ]
+    mode           = "ml-focused"
+    estimated_cost = "$25-30/month"
+    optimization   = "NAT Instance (vs NAT Gateway), t3.micro instances, minimal log retention"
+    cost_breakdown = {
+      instances     = "3x t3.micro (~$21/month)"
+      nat_instance  = "1x t3.nano (~$3/month)"
+      storage       = "S3 Standard (~$1-5/month depending on usage)"
+      data_transfer = "Free tier covers typical ML training data volume"
+    }
+  }
+}
+
+# ====================================
+# QUICK ACCESS GUIDE
+# ====================================
+
+output "quick_access" {
+  description = "Quick access information for ML-focused deployment"
+  value = {
+    web_app_url     = "http://${module.ml_data_generators.web_server_public_ip}/"
+    api_endpoint    = "http://${module.ml_data_generators.web_server_public_ip}:8080/api/users"
+    ssh_access      = "ssh -i your-key.pem ec2-user@${module.ml_data_generators.web_server_public_ip}"
+    bastion_access  = var.enable_bastion && length(module.bastion_host) > 0 ? "ssh -i your-key.pem ec2-user@${module.bastion_host[0].bastion_public_ip}" : "Bastion not enabled"
+    data_collection = "Automated traffic generation and anomaly detection data"
   }
 }
 
@@ -158,24 +164,31 @@ output "ml_training_info" {
 # ====================================
 
 output "deployment_summary" {
-  description = "Summary of deployed resources"
+  description = "Complete deployment summary"
   value = {
-    mode              = "ml-focused"
-    environment       = var.environment
-    region            = var.region
-    vpc_cidr          = module.ml_network.vpc_cidr
-    instances_count   = var.enable_bastion ? 4 : 3 # Web + Traffic + NAT + optional Bastion
-    estimated_cost    = "$15-25/month"
-    data_collection   = "Comprehensive anomaly detection training data"
-    ml_capabilities   = "Ready for supervised and unsupervised ML"
-    traffic_intensity = var.traffic_intensity
-    data_export       = var.enable_data_export ? "Enabled" : "Disabled"
-    bastion_host      = var.enable_bastion ? "Enabled" : "Disabled"
-    next_steps = [
-      "Monitor data collection in CloudWatch",
-      "Download ML datasets from S3",
-      "SSH into instances to examine logs",
-      "Start building anomaly detection models"
-    ]
+    mode        = "ml-focused"
+    environment = var.environment
+    region      = var.region
+    vpc_cidr    = module.foundation.vpc_cidr_block
+
+    deployed_services = {
+      foundation_network  = "deployed"
+      ml_data_generators  = "deployed"
+      enhanced_monitoring = var.enable_enhanced_monitoring ? "enabled" : "disabled"
+      bastion_host        = var.enable_bastion ? "enabled" : "disabled"
+      s3_storage          = "deployed"
+    }
+
+    data_collection = {
+      vpc_flow_logs   = var.enable_flow_logs ? "enabled" : "disabled"
+      cloudwatch_logs = var.enable_cloudwatch_logs ? "enabled" : "disabled"
+      log_retention   = "${var.log_retention_days} days"
+    }
+
+    ml_capabilities = {
+      anomaly_detection = "comprehensive-traffic-patterns"
+      data_types        = "network,authentication,system,application"
+      export_ready      = true
+    }
   }
 } 

@@ -4,16 +4,6 @@
 # Enhanced infrastructure for comprehensive ML training data generation
 # Optimized for anomaly detection with advanced data collection
 
-terraform {
-  required_version = ">= 1.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
-
 # ====================================
 # DATA SOURCES
 # ====================================
@@ -56,11 +46,11 @@ locals {
 }
 
 # ====================================
-# ML NETWORK INFRASTRUCTURE
+# FOUNDATION NETWORK INFRASTRUCTURE
 # ====================================
 
-module "ml_network" {
-  source = "../../modules/ml-network"
+module "foundation" {
+  source = "../../modules/foundation"
 
   # Basic configuration
   environment          = var.environment
@@ -71,13 +61,40 @@ module "ml_network" {
 
   # Enhanced features for ML data collection
   enable_nat_instance = true
+  nat_instance_ami_id = data.aws_ami.amazon_linux.id
   nat_instance_type   = var.nat_instance_type
+  key_name            = var.existing_key_name
+  admin_cidr_blocks   = var.admin_cidr_blocks
 
-  # Access configuration
-  admin_cidr_blocks = var.admin_cidr_blocks
-  key_name          = var.existing_key_name
+  # Flow logs
+  enable_flow_logs   = var.enable_flow_logs
+  flow_logs_role_arn = module.iam.vpc_flow_logs_role_arn
 
-  tags = local.common_tags
+  # Tags
+  common_tags = local.common_tags
+
+  depends_on = [module.iam]
+}
+
+# ====================================
+# IAM ROLES FOR ML INFRASTRUCTURE
+# ====================================
+
+module "iam" {
+  source = "../../modules/iam"
+
+  # Environment
+  environment = var.environment
+
+  # Feature toggles
+  enable_flow_logs    = var.enable_flow_logs
+  enable_admin_role   = true
+  enable_bastion_role = var.enable_bastion
+  enable_app_roles    = false
+  enable_lambda_roles = false
+
+  # Tags
+  common_tags = local.common_tags
 }
 
 # ====================================
@@ -88,13 +105,9 @@ module "ml_data_generators" {
   source = "../../modules/ml-generators"
 
   # Network dependencies
-  vpc_id             = module.ml_network.vpc_id
-  public_subnet_ids  = module.ml_network.public_subnet_ids
-  private_subnet_ids = module.ml_network.private_subnet_ids
-
-  # Instance configuration
-  web_server_type  = var.web_server_type
-  traffic_gen_type = var.traffic_gen_type
+  vpc_id             = module.foundation.vpc_id
+  public_subnet_ids  = module.foundation.public_subnet_ids
+  private_subnet_ids = module.foundation.private_subnet_ids
 
   # Basic configuration
   environment       = var.environment
@@ -102,40 +115,18 @@ module "ml_data_generators" {
   key_name          = var.existing_key_name
   admin_cidr_blocks = var.admin_cidr_blocks
 
+  # Instance configuration
+  web_server_type  = var.web_server_type
+  traffic_gen_type = var.traffic_gen_type
+
   # Enhanced data collection settings
-  enable_flow_logs   = var.enable_flow_logs
-  enable_cloudwatch  = var.enable_cloudwatch_logs
-  log_retention_days = var.log_retention_days
+  enable_flow_logs  = var.enable_flow_logs
+  enable_cloudwatch = var.enable_cloudwatch_logs
 
+  # Tags
   tags = local.common_tags
 
-  depends_on = [module.ml_network]
-}
-
-# ====================================
-# ML SECURITY (Enhanced)
-# ====================================
-
-module "ml_security" {
-  source = "../../modules/ml-security"
-
-  # Environment
-  environment = var.environment
-
-  # Network context
-  vpc_id = module.ml_network.vpc_id
-
-  # Access configuration
-  admin_cidr_blocks = var.admin_cidr_blocks
-
-  # Enhanced ports for ML data scenarios
-  web_port    = 80
-  ssh_port    = 22
-  custom_port = var.app_port
-
-  tags = local.common_tags
-
-  depends_on = [module.ml_network]
+  depends_on = [module.foundation]
 }
 
 # ====================================
@@ -166,9 +157,9 @@ module "bastion_host" {
   source = "../../modules/platform"
 
   # Dependencies
-  vpc_id             = module.ml_network.vpc_id
-  public_subnet_ids  = module.ml_network.public_subnet_ids
-  private_subnet_ids = module.ml_network.private_subnet_ids
+  vpc_id             = module.foundation.vpc_id
+  public_subnet_ids  = module.foundation.public_subnet_ids
+  private_subnet_ids = module.foundation.private_subnet_ids
 
   # Environment
   environment = var.environment
@@ -188,7 +179,7 @@ module "bastion_host" {
 
   # Monitoring
   enable_logging             = true
-  enable_detailed_monitoring = false
+  enable_detailed_monitoring = var.enable_enhanced_monitoring
   log_retention_days         = var.log_retention_days
 
   # Network Security
@@ -197,5 +188,5 @@ module "bastion_host" {
   # Tags
   common_tags = local.common_tags
 
-  depends_on = [module.ml_network]
+  depends_on = [module.foundation]
 } 

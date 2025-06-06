@@ -1,5 +1,5 @@
 # ====================================
-# SIMPLIFIED ML INFRASTRUCTURE PROVIDERS
+# ML-FOCUSED INFRASTRUCTURE PROVIDERS
 # ====================================
 
 terraform {
@@ -14,13 +14,9 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1" # Change this to your preferred region
+  region = var.region
 
   default_tags {
-    tags = {
-      Project   = "ML-Network-Data-Generator"
-      ManagedBy = "Terraform"
-      Purpose   = "ML-Training-Data"
-    }
+    tags = var.common_tags
   }
 }
