@@ -1,5 +1,9 @@
 # ====================================
-# ML GENERATORS MODULE - VARIABLES
+# ML GENERATORS MODULE VARIABLES
+# ====================================
+
+# ====================================
+# BASIC CONFIGURATION
 # ====================================
 
 variable "environment" {
@@ -8,7 +12,7 @@ variable "environment" {
 }
 
 variable "vpc_id" {
-  description = "VPC ID where resources will be created"
+  description = "VPC ID"
   type        = string
 }
 
@@ -22,8 +26,17 @@ variable "private_subnet_ids" {
   type        = list(string)
 }
 
+# ====================================
+# INSTANCE CONFIGURATION
+# ====================================
+
 variable "ami_id" {
-  description = "AMI ID for EC2 instances"
+  description = "AMI ID for instances"
+  type        = string
+}
+
+variable "key_name" {
+  description = "EC2 Key Pair name"
   type        = string
 }
 
@@ -39,30 +52,13 @@ variable "traffic_gen_type" {
   default     = "t3.micro"
 }
 
-variable "key_name" {
-  description = "EC2 Key Pair name for SSH access"
-  type        = string
-}
-
 variable "admin_cidr_blocks" {
-  description = "CIDR blocks allowed for admin access"
+  description = "CIDR blocks for admin access"
   type        = list(string)
 }
 
-variable "enable_cloudwatch" {
-  description = "Enable CloudWatch logging"
-  type        = bool
-  default     = true
-}
-
-variable "enable_flow_logs" {
-  description = "Enable VPC Flow Logs"
-  type        = bool
-  default     = true
-}
-
 variable "tags" {
-  description = "Common tags to apply to resources"
+  description = "Tags to apply to resources"
   type        = map(string)
   default     = {}
 } 

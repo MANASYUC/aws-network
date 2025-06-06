@@ -205,60 +205,34 @@ resource "aws_instance" "bastion" {
   count                       = var.enable_bastion ? 1 : 0
   ami                         = var.bastion_ami_id
   instance_type               = var.bastion_instance_type
+  key_name                    = var.existing_key_name != "" ? var.existing_key_name : aws_key_pair.bastion[0].key_name
   subnet_id                   = var.public_subnet_ids[0]
-  vpc_security_group_ids      = [aws_security_group.bastion.id]
-  key_name                    = var.create_bastion_key ? aws_key_pair.bastion[0].key_name : var.existing_key_name
+  vpc_security_group_ids      = [aws_security_group.bastion[0].id]
   associate_public_ip_address = true
 
-  # User data script for bastion setup
   user_data = base64encode(templatefile("${path.module}/user_data/bastion_setup.sh", {
     environment = var.environment
-    log_group   = var.enable_logging ? aws_cloudwatch_log_group.bastion[0].name : ""
+    log_group   = ""
   }))
 
-  # Enhanced monitoring
   monitoring = var.enable_detailed_monitoring
 
-  # EBS optimization for better network performance
-  ebs_optimized = true
-
   root_block_device {
-    volume_type           = "gp3"
-    volume_size           = var.bastion_root_volume_size
-    encrypted             = true
+    volume_type           = "gp2"
+    volume_size           = 8
     delete_on_termination = true
-
-    tags = merge(var.common_tags, {
-      Name = "${var.environment}-bastion-root-volume"
-    })
   }
 
   tags = merge(var.common_tags, {
-    Name = "${var.environment}-bastion-host"
-    Type = "Platform"
-    Role = "BastionHost"
+    Name = "${var.environment}-bastion"
+    Type = "Management"
+    Role = "Bastion"
   })
-
-  lifecycle {
-    ignore_changes = [ami, user_data]
-  }
 }
 
 # ====================================
 # LOGGING & MONITORING
 # ====================================
-
-# CloudWatch Log Group for bastion logs
-resource "aws_cloudwatch_log_group" "bastion" {
-  count             = var.enable_bastion && var.enable_logging ? 1 : 0
-  name              = "/aws/ec2/bastion/${var.environment}"
-  retention_in_days = var.log_retention_days
-
-  tags = merge(var.common_tags, {
-    Name = "${var.environment}-bastion-logs"
-    Type = "Platform"
-  })
-}
 
 # ====================================
 # NETWORK ACLs (Additional Security Layer)

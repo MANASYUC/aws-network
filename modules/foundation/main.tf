@@ -217,29 +217,4 @@ resource "aws_route_table_association" "private" {
   count          = length(aws_subnet.private)
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private.id
-}
-
-# VPC Flow Logs for network monitoring (optional)
-resource "aws_flow_log" "vpc" {
-  count           = var.enable_flow_logs ? 1 : 0
-  iam_role_arn    = var.flow_logs_role_arn
-  log_destination = aws_cloudwatch_log_group.vpc_flow_logs[0].arn
-  traffic_type    = "ALL"
-  vpc_id          = aws_vpc.main.id
-
-  tags = merge(var.common_tags, {
-    Name = "${var.environment}-vpc-flow-logs"
-    Type = "Foundation"
-  })
-}
-
-resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
-  count             = var.enable_flow_logs ? 1 : 0
-  name              = "/aws/vpc/flowlogs/${var.environment}"
-  retention_in_days = 30
-
-  tags = merge(var.common_tags, {
-    Name = "${var.environment}-vpc-flow-logs"
-    Type = "Foundation"
-  })
 } 

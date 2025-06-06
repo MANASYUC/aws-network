@@ -63,11 +63,9 @@ module "iam" {
   environment = var.environment
 
   # Feature toggles
-  enable_flow_logs    = var.enable_flow_logs
   enable_admin_role   = true
   enable_bastion_role = var.enable_bastion
   enable_app_roles    = var.enable_app_tier
-  enable_lambda_roles = false
 
   # Tags
   common_tags = local.common_tags
@@ -91,16 +89,12 @@ module "foundation" {
 
   # Features
   enable_nat_instance = var.enable_nat_instance
-  enable_flow_logs    = var.enable_flow_logs
 
   # NAT Configuration
   nat_instance_ami_id = data.aws_ami.amazon_linux.id
   nat_instance_type   = var.nat_instance_type
   key_name            = var.existing_key_name
   admin_cidr_blocks   = var.admin_cidr_blocks
-
-  # IAM Dependencies
-  flow_logs_role_arn = module.iam.vpc_flow_logs_role_arn
 
   # Tags
   common_tags = local.common_tags

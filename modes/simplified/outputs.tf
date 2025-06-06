@@ -8,18 +8,12 @@
 # ====================================
 
 output "vpc_info" {
-  description = "VPC configuration details"
+  description = "VPC information"
   value = {
-    vpc_id   = module.ml_network.vpc_id
-    vpc_cidr = module.ml_network.vpc_cidr
-    public_subnets = {
-      ids   = module.ml_network.public_subnet_ids
-      cidrs = module.ml_network.public_subnet_cidrs
-    }
-    private_subnets = {
-      ids   = module.ml_network.private_subnet_ids
-      cidrs = module.ml_network.private_subnet_cidrs
-    }
+    vpc_id               = module.ml_network.vpc_id
+    public_subnet_ids    = module.ml_network.public_subnet_ids
+    private_subnet_ids   = module.ml_network.private_subnet_ids
+    internet_gateway_id  = module.ml_network.internet_gateway_id
   }
 }
 
@@ -27,31 +21,19 @@ output "vpc_info" {
 # INSTANCE ACCESS
 # ====================================
 
-output "web_server_info" {
-  description = "Web server access information"
+output "instances" {
+  description = "EC2 instance information"
   value = {
-    public_ip   = module.ml_data_generators.web_server_public_ip
-    private_ip  = module.ml_data_generators.web_server_private_ip
-    instance_id = module.ml_data_generators.web_server_instance_id
-    ssh_command = "ssh -i your-key.pem ec2-user@${module.ml_data_generators.web_server_public_ip}"
-  }
-}
-
-output "traffic_generator_info" {
-  description = "Traffic generator instance information"
-  value = {
-    private_ip  = module.ml_data_generators.traffic_generator_private_ip
-    instance_id = module.ml_data_generators.traffic_generator_instance_id
-    status      = "Running in private subnet, generating ML training data"
-  }
-}
-
-output "nat_instance_info" {
-  description = "NAT instance information"
-  value = {
-    public_ip   = module.ml_network.nat_instance_public_ip
-    private_ip  = module.ml_network.nat_instance_private_ip
-    instance_id = module.ml_network.nat_instance_id
+    web_server = {
+      id         = module.ml_data_generators.web_server_id
+      public_ip  = module.ml_data_generators.web_server_public_ip
+      private_ip = module.ml_data_generators.web_server_private_ip
+    }
+    traffic_generator = {
+      id         = module.ml_data_generators.traffic_generator_id
+      private_ip = module.ml_data_generators.traffic_generator_private_ip
+    }
+    nat_instance = module.ml_network.nat_instance_info
   }
 }
 
@@ -59,42 +41,36 @@ output "nat_instance_info" {
 # DATA STORAGE
 # ====================================
 
-output "s3_buckets" {
-  description = "S3 buckets for ML data storage"
+output "ml_storage" {
+  description = "ML data storage information"
   value = {
-    app_storage_bucket = module.ml_storage.app_storage_bucket
-    logs_bucket        = module.ml_storage.logs_bucket
+    bucket_name = module.ml_storage.bucket_name
+    bucket_arn  = module.ml_storage.bucket_arn
   }
 }
 
 # ====================================
-# MONITORING
+# SECURITY GROUPS
 # ====================================
 
-output "cloudwatch_logs" {
-  description = "CloudWatch log groups"
+output "security_groups" {
+  description = "Security group information"
   value = {
-    ml_logs       = module.ml_data_generators.cloudwatch_log_group
-    vpc_flow_logs = module.ml_data_generators.vpc_flow_log_group
+    web_server        = module.ml_data_generators.web_server_security_group_id
+    traffic_generator = module.ml_data_generators.traffic_generator_security_group_id
   }
 }
 
 # ====================================
-# QUICK ACCESS COMMANDS
+# SSH CONNECTION COMMANDS
 # ====================================
 
 output "ssh_commands" {
-  description = "SSH commands for quick access"
+  description = "SSH connection commands"
   value = {
-    web_server   = "ssh -i your-key.pem ec2-user@${module.ml_data_generators.web_server_public_ip}"
-    nat_instance = "ssh -i your-key.pem ec2-user@${module.ml_network.nat_instance_public_ip}"
+    web_server = "ssh -i your-key.pem ec2-user@${module.ml_data_generators.web_server_public_ip}"
+    nat_instance = "ssh -i your-key.pem ec2-user@${module.ml_network.nat_instance_info.public_ip}"
   }
-  sensitive = false
-}
-
-output "web_server_url" {
-  description = "Web server URL for testing"
-  value       = "http://${module.ml_data_generators.web_server_public_ip}"
 }
 
 # ====================================
@@ -102,20 +78,18 @@ output "web_server_url" {
 # ====================================
 
 output "deployment_summary" {
-  description = "Summary of deployed resources"
+  description = "Deployment summary for simplified mode"
   value = {
-    mode            = "simplified"
-    environment     = var.environment
-    region          = var.region
-    vpc_cidr        = module.ml_network.vpc_cidr
-    instances_count = 3 # Web server + Traffic generator + NAT
-    estimated_cost  = "$0-15/month (Free Tier optimized)"
-    data_collection = "Basic ML training data generation"
+    mode             = "simplified"
+    instance_count   = 3
+    estimated_cost   = "$0-15/month (Free Tier optimized)"
+    data_collection  = "Basic ML training data"
+    
     next_steps = [
-      "SSH into web server to view logs",
-      "Check S3 buckets for ML data",
-      "Monitor CloudWatch logs",
-      "Upgrade to ml-focused mode for enhanced features"
+      "Connect to instances using SSH commands above",
+      "Monitor data generation in S3 bucket",
+      "Run for ~30 hours to collect sufficient data",
+      "Run 'terraform destroy' when done learning"
     ]
   }
 } 

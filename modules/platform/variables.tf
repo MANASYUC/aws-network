@@ -87,7 +87,7 @@ variable "existing_key_name" {
 
 # Logging and monitoring
 variable "enable_logging" {
-  description = "Enable CloudWatch logging"
+  description = "Enable logging"
   type        = bool
   default     = true
 }
@@ -99,9 +99,9 @@ variable "enable_detailed_monitoring" {
 }
 
 variable "log_retention_days" {
-  description = "Number of days to retain logs"
+  description = "Log retention period in days"
   type        = number
-  default     = 30
+  default     = 7
 }
 
 # Network security

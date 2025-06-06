@@ -66,10 +66,6 @@ module "foundation" {
   key_name            = var.existing_key_name
   admin_cidr_blocks   = var.admin_cidr_blocks
 
-  # Flow logs
-  enable_flow_logs   = var.enable_flow_logs
-  flow_logs_role_arn = module.iam.vpc_flow_logs_role_arn
-
   # Tags
   common_tags = local.common_tags
 
@@ -87,11 +83,9 @@ module "iam" {
   environment = var.environment
 
   # Feature toggles
-  enable_flow_logs    = var.enable_flow_logs
   enable_admin_role   = true
   enable_bastion_role = var.enable_bastion
   enable_app_roles    = false
-  enable_lambda_roles = false
 
   # Tags
   common_tags = local.common_tags
@@ -118,10 +112,6 @@ module "ml_data_generators" {
   # Instance configuration
   web_server_type  = var.web_server_type
   traffic_gen_type = var.traffic_gen_type
-
-  # Enhanced data collection settings
-  enable_flow_logs  = var.enable_flow_logs
-  enable_cloudwatch = var.enable_cloudwatch_logs
 
   # Tags
   tags = local.common_tags
@@ -178,9 +168,8 @@ module "bastion_host" {
   existing_key_name     = var.existing_key_name
 
   # Monitoring
-  enable_logging             = true
-  enable_detailed_monitoring = var.enable_enhanced_monitoring
-  log_retention_days         = var.log_retention_days
+  enable_logging = true
+  log_retention_days = 7
 
   # Network Security
   enable_network_acls = false

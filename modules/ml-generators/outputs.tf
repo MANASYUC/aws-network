@@ -1,15 +1,11 @@
 # ====================================
-# ML GENERATORS MODULE - OUTPUTS
+# ML GENERATORS MODULE OUTPUTS
 # ====================================
 
-output "web_server_instance_id" {
-  description = "Instance ID of the web server"
+# Instance Information
+output "web_server_id" {
+  description = "ID of the web server instance"
   value       = aws_instance.web_server.id
-}
-
-output "web_server_public_ip" {
-  description = "Public IP of the web server"
-  value       = aws_instance.web_server.public_ip
 }
 
 output "web_server_private_ip" {
@@ -17,8 +13,13 @@ output "web_server_private_ip" {
   value       = aws_instance.web_server.private_ip
 }
 
-output "traffic_generator_instance_id" {
-  description = "Instance ID of the traffic generator"
+output "web_server_public_ip" {
+  description = "Public IP of the web server"
+  value       = aws_instance.web_server.public_ip
+}
+
+output "traffic_generator_id" {
+  description = "ID of the traffic generator instance"
   value       = aws_instance.traffic_generator.id
 }
 
@@ -27,22 +28,13 @@ output "traffic_generator_private_ip" {
   value       = aws_instance.traffic_generator.private_ip
 }
 
+# Security Group Information
 output "web_server_security_group_id" {
-  description = "Security group ID for web server"
+  description = "ID of the web server security group"
   value       = aws_security_group.web_server.id
 }
 
 output "traffic_generator_security_group_id" {
-  description = "Security group ID for traffic generator"
+  description = "ID of the traffic generator security group"
   value       = aws_security_group.traffic_generator.id
-}
-
-output "flow_logs_group_name" {
-  description = "CloudWatch log group name for VPC flow logs"
-  value       = var.enable_flow_logs ? aws_cloudwatch_log_group.flow_logs[0].name : null
-}
-
-output "ml_logs_group_name" {
-  description = "CloudWatch log group name for ML application logs"
-  value       = var.enable_cloudwatch ? aws_cloudwatch_log_group.ml_logs[0].name : null
 } 

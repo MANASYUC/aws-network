@@ -101,11 +101,6 @@ module "ml_data_generators" {
   key_name          = var.existing_key_name
   admin_cidr_blocks = var.admin_cidr_blocks
 
-  # Data collection settings
-  enable_flow_logs   = var.enable_flow_logs
-  enable_cloudwatch  = var.enable_cloudwatch_logs
-  log_retention_days = 1 # Free tier optimization
-
   tags = local.common_tags
 
   depends_on = [module.ml_network]

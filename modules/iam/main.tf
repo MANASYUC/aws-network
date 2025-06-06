@@ -190,12 +190,12 @@ resource "aws_iam_role_policy" "bastion" {
 }
 
 # ====================================
-# APPLICATION TIER ROLES
+# EC2 APPLICATION ROLES (Future use)
 # ====================================
 
-resource "aws_iam_role" "app_tier" {
+resource "aws_iam_role" "ec2_app_role" {
   count = var.enable_app_roles ? 1 : 0
-  name  = "${var.environment}-app-tier-role"
+  name  = "${var.environment}-ec2-app-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -211,98 +211,16 @@ resource "aws_iam_role" "app_tier" {
   })
 
   tags = merge(var.common_tags, {
-    Name    = "${var.environment}-app-tier-role"
+    Name    = "${var.environment}-ec2-app-role"
     Type    = "IAM"
-    Purpose = "Application Tier"
+    Purpose = "EC2-Application-Access"
   })
 }
 
-resource "aws_iam_instance_profile" "app_tier" {
+resource "aws_iam_instance_profile" "ec2_app_profile" {
   count = var.enable_app_roles ? 1 : 0
-  name  = "${var.environment}-app-tier-profile"
-  role  = aws_iam_role.app_tier[0].name
-}
+  name  = "${var.environment}-ec2-app-profile"
+  role  = aws_iam_role.ec2_app_role[0].name
 
-resource "aws_iam_role_policy" "app_tier" {
-  count = var.enable_app_roles ? 1 : 0
-  name  = "${var.environment}-app-tier-policy"
-  role  = aws_iam_role.app_tier[0].id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject"
-        ]
-        Effect   = "Allow"
-        Resource = "arn:aws:s3:::${var.environment}-app-bucket/*"
-      },
-      {
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ]
-        Effect   = "Allow"
-        Resource = "*"
-      }
-    ]
-  })
-}
-
-# ====================================
-# LAMBDA EXECUTION ROLES
-# ====================================
-
-resource "aws_iam_role" "lambda_execution" {
-  count = var.enable_lambda_roles ? 1 : 0
-  name  = "${var.environment}-lambda-execution-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-      }
-    ]
-  })
-
-  tags = merge(var.common_tags, {
-    Name    = "${var.environment}-lambda-execution-role"
-    Type    = "IAM"
-    Purpose = "Lambda Execution"
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_basic" {
-  count      = var.enable_lambda_roles ? 1 : 0
-  role       = aws_iam_role.lambda_execution[0].name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-resource "aws_iam_role_policy" "lambda_custom" {
-  count = var.enable_lambda_roles ? 1 : 0
-  name  = "${var.environment}-lambda-custom-policy"
-  role  = aws_iam_role.lambda_execution[0].id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "ec2:CreateNetworkInterface",
-          "ec2:DescribeNetworkInterfaces",
-          "ec2:DeleteNetworkInterface"
-        ]
-        Effect   = "Allow"
-        Resource = "*"
-      }
-    ]
-  })
+  tags = var.common_tags
 } 

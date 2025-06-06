@@ -24,11 +24,6 @@ nat_instance_type = "t3.nano"                       # NAT instance type (cost op
 # ====================================
 app_port = 8080                                     # Custom application port
 
-# LOGGING CONFIGURATION (Free Tier Optimized)
-# ====================================
-enable_flow_logs       = true                       # VPC Flow Logs for ML data
-enable_cloudwatch_logs = true                       # CloudWatch logging
-
 # TAGGING
 # ====================================
 common_tags = {
@@ -48,9 +43,8 @@ common_tags = {
 # ✅ 1 NAT instance (Internet access for private subnet)
 # ✅ VPC with public/private subnets
 # ✅ S3 buckets for ML data storage
-# ✅ CloudWatch logs for monitoring
-# ✅ VPC Flow Logs for network analysis
 # ✅ Basic security groups
+# ✅ Direct S3 data collection (no CloudWatch)
 
 # Estimated Cost: ~$0-15/month (Free Tier friendly)
 

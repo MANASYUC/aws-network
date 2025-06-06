@@ -1,49 +1,38 @@
 # ====================================
-# IAM MODULE - INPUT VARIABLES
+# IAM MODULE VARIABLES
 # ====================================
 
 variable "environment" {
-  description = "Environment name (e.g., dev, staging, prod)"
+  description = "Environment name"
   type        = string
-
-  validation {
-    condition     = contains(["dev", "staging", "prod"], var.environment)
-    error_message = "Environment must be one of: dev, staging, prod."
-  }
 }
 
 variable "enable_flow_logs" {
-  description = "Enable VPC Flow Logs IAM resources"
+  description = "Enable VPC Flow Logs IAM role"
   type        = bool
   default     = false
 }
 
 variable "enable_admin_role" {
-  description = "Enable admin role with EC2 and S3 access"
+  description = "Enable administrative role"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "enable_bastion_role" {
-  description = "Enable bastion host IAM role"
+  description = "Enable bastion host role"
   type        = bool
   default     = false
 }
 
 variable "enable_app_roles" {
-  description = "Enable application tier IAM roles"
-  type        = bool
-  default     = false
-}
-
-variable "enable_lambda_roles" {
-  description = "Enable Lambda execution roles"
+  description = "Enable application tier roles"
   type        = bool
   default     = false
 }
 
 variable "common_tags" {
-  description = "Common tags to apply to all IAM resources"
+  description = "Common tags to apply to all resources"
   type        = map(string)
   default     = {}
 }

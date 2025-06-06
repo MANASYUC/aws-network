@@ -109,28 +109,6 @@ variable "export_schedule" {
 # LOGGING AND MONITORING
 # ====================================
 
-variable "enable_flow_logs" {
-  description = "Enable VPC Flow Logs (essential for network anomaly detection)"
-  type        = bool
-  default     = true
-}
-
-variable "enable_cloudwatch_logs" {
-  description = "Enable CloudWatch logging"
-  type        = bool
-  default     = true
-}
-
-variable "log_retention_days" {
-  description = "CloudWatch log retention days (1-3 for free tier optimization)"
-  type        = number
-  default     = 1
-  validation {
-    condition     = var.log_retention_days >= 1 && var.log_retention_days <= 14
-    error_message = "Log retention must be between 1 and 14 days for cost control."
-  }
-}
-
 variable "s3_retention_days" {
   description = "S3 data retention days for ML datasets"
   type        = number

@@ -68,22 +68,6 @@ variable "app_port" {
 }
 
 # ====================================
-# LOGGING AND MONITORING
-# ====================================
-
-variable "enable_flow_logs" {
-  description = "Enable VPC Flow Logs"
-  type        = bool
-  default     = true
-}
-
-variable "enable_cloudwatch_logs" {
-  description = "Enable CloudWatch logging"
-  type        = bool
-  default     = true
-}
-
-# ====================================
 # TAGGING
 # ====================================
 

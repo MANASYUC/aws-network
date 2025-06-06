@@ -32,17 +32,14 @@ traffic_intensity   = "medium"                      # Traffic generation: low, m
 enable_data_export  = true                          # Automated ML data export to S3
 export_schedule     = "0 * * * *"                   # Hourly data export
 
-# LOGGING CONFIGURATION (Optimized for ML + Free Tier)
+# S3 DATA STORAGE
 # ====================================
-enable_flow_logs       = true                       # VPC Flow Logs (essential for network anomaly detection)
-enable_cloudwatch_logs = true                       # CloudWatch logging
-log_retention_days     = 1                          # CloudWatch retention (1-3 days for free tier)
 s3_retention_days      = 90                         # S3 dataset retention
 
 # OPTIONAL FEATURES
 # ====================================
 enable_bastion            = false                   # Bastion host for secure access
-enable_enhanced_monitoring = false                  # Enhanced CloudWatch monitoring
+enable_enhanced_monitoring = false                  # Enhanced monitoring
 
 # TAGGING
 # ====================================
@@ -67,10 +64,10 @@ common_tags = {
 # ✅ Automated S3 export with compression
 # ✅ Time-series data collection
 # ✅ Optional bastion host
-# ✅ Advanced monitoring capabilities
+# ✅ Direct S3 storage (optimized pipeline)
 
 # Data Types Collected:
-# 🔍 Network Patterns: VPC Flow Logs, HTTP traffic, connection patterns
+# 🔍 Network Patterns: HTTP traffic, connection patterns (via S3)
 # 🔐 Authentication: Login events, brute force attempts, timing patterns
 # 🖥️  System Behavior: CPU/memory usage, process patterns, errors
 # 📱 Application Metrics: Response times, status codes, user agents
@@ -90,12 +87,10 @@ common_tags = {
 
 # High-intensity traffic generation:
 # traffic_intensity = "high"
-# log_retention_days = 3
 # enable_enhanced_monitoring = true
 
 # With bastion host for secure access:
 # enable_bastion = true
 
 # Extended data retention:
-# s3_retention_days = 180
-# log_retention_days = 7 
+# s3_retention_days = 180 

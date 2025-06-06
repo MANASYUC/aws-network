@@ -108,6 +108,5 @@ output "network_summary" {
     private_subnets      = length(aws_subnet.private)
     availability_zones   = length(var.availability_zones)
     nat_instance_enabled = var.enable_nat_instance
-    flow_logs_enabled    = var.enable_flow_logs
   }
 } 
