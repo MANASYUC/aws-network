@@ -97,6 +97,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "app_storage" {
     id     = "incomplete_uploads"
     status = "Enabled"
 
+    filter {
+      prefix = ""  # Apply to all objects
+    }
+
     abort_incomplete_multipart_upload {
       days_after_initiation = 1
     }

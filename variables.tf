@@ -1,23 +1,8 @@
 # ====================================
-# MERGED VARIABLES CONFIGURATION
+# AWS NETWORK INFRASTRUCTURE - ROOT VARIABLES
 # ====================================
-# Supports both simplified ML-focused and comprehensive learning modes
+# Variables for the main Terraform configuration
 # ====================================
-
-# ====================================
-# DEPLOYMENT MODE SELECTION
-# ====================================
-
-variable "deployment_mode" {
-  description = "Deployment mode: 'simplified' (minimal cost), 'ml-focused' (ML optimized), or 'full' (comprehensive learning)"
-  type        = string
-  default     = "simplified"
-  
-  validation {
-    condition     = contains(["simplified", "ml-focused", "full"], var.deployment_mode)
-    error_message = "Deployment mode must be one of: simplified, ml-focused, full."
-  }
-}
 
 # ====================================
 # ENVIRONMENT & GLOBAL CONFIGURATION
@@ -26,11 +11,11 @@ variable "deployment_mode" {
 variable "environment" {
   description = "Environment name (dev, staging, prod)"
   type        = string
-  default     = "ml-dev"
+  default     = "dev"
   
   validation {
-    condition     = contains(["dev", "staging", "prod", "ml-dev", "ml-prod"], var.environment)
-    error_message = "Environment must be one of: dev, staging, prod, ml-dev, ml-prod."
+    condition     = contains(["dev", "staging", "prod"], var.environment)
+    error_message = "Environment must be one of: dev, staging, prod."
   }
 }
 
@@ -51,12 +36,14 @@ variable "common_tags" {
 }
 
 # ====================================
-# REQUIRED VARIABLES (ALL MODES)
+# REQUIRED SECURITY CONFIGURATION
 # ====================================
 
 variable "admin_cidr_blocks" {
-  description = "CIDR blocks allowed for admin access"
+  description = "CIDR blocks allowed for administrative access"
   type        = list(string)
+  default     = ["0.0.0.0/0"]  # WARNING: Change this to your specific IP range
+  
   validation {
     condition = length(var.admin_cidr_blocks) > 0 && alltrue([
       for cidr in var.admin_cidr_blocks : can(cidrhost(cidr, 0))
@@ -68,18 +55,20 @@ variable "admin_cidr_blocks" {
 variable "existing_key_name" {
   description = "Name of existing EC2 key pair for SSH access"
   type        = string
+  default     = ""
+  
   validation {
     condition     = length(var.existing_key_name) > 0
-    error_message = "Key name cannot be empty."
+    error_message = "Key name cannot be empty - you must provide an existing EC2 key pair name."
   }
 }
 
 # ====================================
-# NETWORK CONFIGURATION (FULL MODE)
+# NETWORK CONFIGURATION
 # ====================================
 
 variable "vpc_cidr" {
-  description = "CIDR block for the VPC (used in full mode)"
+  description = "CIDR block for the VPC"
   type        = string
   default     = "10.0.0.0/16"
   
@@ -90,7 +79,7 @@ variable "vpc_cidr" {
 }
 
 variable "az_count" {
-  description = "Number of availability zones to use (full mode only)"
+  description = "Number of availability zones to use"
   type        = number
   default     = 2
   
@@ -101,23 +90,23 @@ variable "az_count" {
 }
 
 variable "public_subnet_cidrs" {
-  description = "CIDR blocks for public subnets (full mode)"
+  description = "CIDR blocks for public subnets"
   type        = list(string)
   default     = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 
 variable "private_subnet_cidrs" {
-  description = "CIDR blocks for private subnets (full mode)"
+  description = "CIDR blocks for private subnets"
   type        = list(string)
   default     = ["10.0.11.0/24", "10.0.12.0/24"]
 }
 
 # ====================================
-# NETWORKING & NAT CONFIGURATION
+# NAT CONFIGURATION
 # ====================================
 
 variable "enable_nat_instance" {
-  description = "Enable NAT Instance for private subnet internet access"
+  description = "Enable NAT Instance for private subnet internet access (free tier friendly)"
   type        = bool
   default     = true
 }
@@ -125,7 +114,7 @@ variable "enable_nat_instance" {
 variable "nat_instance_type" {
   description = "Instance type for NAT instance"
   type        = string
-  default     = "t3.nano"
+  default     = "t2.micro"
   
   validation {
     condition     = contains(["t2.micro", "t2.small", "t3.nano", "t3.micro", "t3.small"], var.nat_instance_type)
@@ -134,105 +123,53 @@ variable "nat_instance_type" {
 }
 
 # ====================================
-# ML-FOCUSED VARIABLES
+# MONITORING & LOGGING
 # ====================================
 
-variable "app_port" {
-  description = "Custom application port for testing"
-  type        = number
-  default     = 8080
-}
-
-variable "web_server_type" {
-  description = "Instance type for web server (ML target)"
-  type        = string
-  default     = "t3.micro"
-}
-
-variable "traffic_gen_type" {
-  description = "Instance type for traffic generator"
-  type        = string
-  default     = "t3.micro"
-}
-
-# Data Collection Options
 variable "enable_flow_logs" {
-  description = "Enable VPC flow logs for network traffic analysis"
+  description = "Enable VPC Flow Logs"
   type        = bool
   default     = true
 }
 
-variable "enable_cloudwatch_logs" {
-  description = "Enable CloudWatch logs for application monitoring"
+variable "enable_logging" {
+  description = "Enable CloudWatch logging"
   type        = bool
   default     = true
+}
+
+variable "enable_detailed_monitoring" {
+  description = "Enable detailed CloudWatch monitoring"
+  type        = bool
+  default     = false
 }
 
 variable "log_retention_days" {
   description = "Number of days to retain logs"
   type        = number
-  default     = 7
+  default     = 30
+  
   validation {
     condition     = var.log_retention_days >= 1 && var.log_retention_days <= 365
     error_message = "Log retention must be between 1 and 365 days."
   }
 }
 
-# Traffic Generation Configuration
-variable "enable_traffic_patterns" {
-  description = "Enable automated traffic pattern generation"
-  type        = bool
-  default     = true
-}
-
-variable "traffic_intensity" {
-  description = "Traffic generation intensity (low, medium, high)"
-  type        = string
-  default     = "medium"
-  validation {
-    condition     = contains(["low", "medium", "high"], var.traffic_intensity)
-    error_message = "Traffic intensity must be low, medium, or high."
-  }
-}
-
-# ML Data Export Options
-variable "enable_data_export" {
-  description = "Enable automatic export of ML training data to S3"
+variable "enable_network_acls" {
+  description = "Enable custom Network ACLs"
   type        = bool
   default     = false
 }
 
-variable "export_bucket_name" {
-  description = "S3 bucket name for ML data export (optional)"
-  type        = string
-  default     = ""
-}
-
 # ====================================
-# COST OPTIMIZATION VARIABLES
+# APPLICATION PORTS
 # ====================================
 
-variable "auto_shutdown_enabled" {
-  description = "Enable automatic shutdown during off-hours to save costs"
-  type        = bool
-  default     = true
+variable "app_port" {
+  description = "Port for application tier communication"
+  type        = number
+  default     = 8080
 }
-
-variable "shutdown_schedule" {
-  description = "Cron expression for shutdown schedule (default: 10 PM EST weekdays)"
-  type        = string
-  default     = "0 22 * * 1-5"
-}
-
-variable "startup_schedule" {
-  description = "Cron expression for startup schedule (default: 8 AM EST weekdays)"
-  type        = string
-  default     = "0 8 * * 1-5"
-}
-
-# ====================================
-# FULL MODE VARIABLES (COMPREHENSIVE LEARNING)
-# ====================================
 
 variable "db_port" {
   description = "Port for database tier communication"
@@ -240,11 +177,14 @@ variable "db_port" {
   default     = 3306
 }
 
-# Bastion Configuration (Full Mode)
+# ====================================
+# BASTION CONFIGURATION
+# ====================================
+
 variable "enable_bastion" {
   description = "Enable bastion host deployment"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "bastion_instance_type" {
@@ -260,32 +200,13 @@ variable "create_bastion_key" {
 }
 
 variable "bastion_public_key" {
-  description = "Public key content for bastion SSH access"
+  description = "Public key content for bastion SSH access (required if create_bastion_key is true)"
   type        = string
   default     = ""
 }
 
-# Monitoring & Logging (Full Mode)
-variable "enable_logging" {
-  description = "Enable CloudWatch logging"
-  type        = bool
-  default     = true
-}
-
-variable "enable_detailed_monitoring" {
-  description = "Enable detailed CloudWatch monitoring"
-  type        = bool
-  default     = false
-}
-
-variable "enable_network_acls" {
-  description = "Enable custom Network ACLs"
-  type        = bool
-  default     = false
-}
-
 # ====================================
-# APPLICATION TIERS (FULL MODE ONLY)
+# APPLICATION TIERS (OPTIONAL)
 # ====================================
 
 # Web Tier
@@ -331,12 +252,6 @@ variable "enable_data_tier" {
   description = "Enable data tier deployment"
   type        = bool
   default     = false
-}
-
-variable "db_instance_count" {
-  description = "Number of database tier instances"
-  type        = number
-  default     = 2
 }
 
 variable "db_instance_type" {
@@ -388,32 +303,4 @@ variable "s3_retention_days" {
   description = "Number of days to retain S3 objects"
   type        = number
   default     = 30
-}
-
-# ====================================
-# ML SERVICES (OPTIONAL FOR BOTH MODES)
-# ====================================
-
-variable "enable_ml_services" {
-  description = "Enable ML services module"
-  type        = bool
-  default     = false
-}
-
-variable "ml_bucket_prefix" {
-  description = "Prefix for ML-specific S3 buckets"
-  type        = string
-  default     = "ml-data"
-}
-
-variable "enable_enhanced_monitoring" {
-  description = "Enable enhanced monitoring for ML workloads"
-  type        = bool
-  default     = false
-}
-
-variable "export_schedule" {
-  description = "Cron expression for automated data export"
-  type        = string
-  default     = "0 2 * * *"  # Daily at 2 AM
-}
+} 
